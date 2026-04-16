@@ -1,1504 +1,975 @@
-diff --git a/index.html b/index.html
-index 22255b4de6972df4f5b3c4de92f7b097ccb8d4bc..1ffc8d8c0da6986ddb67a12b5b3b6e6367079b71 100644
---- a/index.html
-+++ b/index.html
-@@ -1,1132 +1,369 @@
--<!DOCTYPE html>
-+<!doctype html>
- <html lang="en">
--<head>
--<meta charset="UTF-8"/>
--<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
--<title>EdgeX — AI Trading Signals</title>
--<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
--<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
--<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
--<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
--<style>
--:root {
--  --green: #00ff9f;
--  --cyan: #00d4ff;
--  --purple: #7b2fff;
--  --bg: #020408;
--  --surface: rgba(0,255,159,0.03);
--  --glass: rgba(0,212,255,0.05);
--  --border: rgba(0,255,159,0.12);
--  --border2: rgba(0,212,255,0.1);
--  --text: #e0f0ff;
--  --muted: #4a6080;
--  --font-head: 'Orbitron', sans-serif;
--  --font-body: 'Rajdhani', sans-serif;
--}
--
--*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
--
--html { scroll-behavior: smooth; }
--
--body {
--  background: var(--bg);
--  color: var(--text);
--  font-family: var(--font-body);
--  font-size: 16px;
--  overflow-x: hidden;
--  cursor: none;
--}
--
--/* ── CUSTOM CURSOR ── */
--#cursor {
--  position: fixed; top: 0; left: 0; z-index: 9999;
--  pointer-events: none;
--  mix-blend-mode: screen;
--}
--.cursor-dot {
--  position: absolute;
--  width: 8px; height: 8px;
--  background: var(--green);
--  border-radius: 50%;
--  transform: translate(-50%,-50%);
--  box-shadow: 0 0 12px var(--green), 0 0 30px var(--green);
--  transition: width 0.2s, height 0.2s;
--}
--.cursor-ring {
--  position: absolute;
--  width: 36px; height: 36px;
--  border: 1px solid rgba(0,255,159,0.4);
--  border-radius: 50%;
--  transform: translate(-50%,-50%);
--  transition: all 0.12s ease;
--}
--body:has(a:hover) .cursor-ring,
--body:has(button:hover) .cursor-ring {
--  width: 52px; height: 52px;
--  border-color: var(--cyan);
--  background: rgba(0,212,255,0.05);
--}
--
--/* ── CANVAS ── */
--#bg-canvas {
--  position: fixed; top: 0; left: 0;
--  width: 100%; height: 100%;
--  z-index: 0; pointer-events: none;
--}
--
--/* ── SCANLINES ── */
--body::after {
--  content: '';
--  position: fixed; inset: 0; z-index: 1; pointer-events: none;
--  background: repeating-linear-gradient(
--    0deg,
--    transparent,
--    transparent 2px,
--    rgba(0,0,0,0.03) 2px,
--    rgba(0,0,0,0.03) 4px
--  );
--  animation: scanMove 8s linear infinite;
--}
--@keyframes scanMove { from{background-position:0 0} to{background-position:0 100px} }
--
--/* ── VIGNETTE ── */
--body::before {
--  content: '';
--  position: fixed; inset: 0; z-index: 1; pointer-events: none;
--  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
--}
--
--/* ── NAV ── */
--nav {
--  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
--  height: 64px;
--  background: rgba(2,4,8,0.7);
--  backdrop-filter: blur(24px);
--  border-bottom: 1px solid var(--border);
--}
--.nav-inner {
--  max-width: 1200px; margin: 0 auto;
--  padding: 0 32px;
--  height: 100%;
--  display: flex; align-items: center; justify-content: space-between;
--}
--.logo {
--  font-family: var(--font-head);
--  font-size: 1.1rem; font-weight: 900;
--  letter-spacing: 0.15em;
--  color: var(--green);
--  text-shadow: 0 0 20px rgba(0,255,159,0.5);
--  text-decoration: none;
--  display: flex; align-items: center; gap: 10px;
--}
--.logo-icon {
--  width: 32px; height: 32px;
--  background: linear-gradient(135deg, var(--green), var(--cyan));
--  border-radius: 8px;
--  display: flex; align-items: center; justify-content: center;
--  font-size: 1rem; color: #000; font-weight: 900;
--  box-shadow: 0 0 20px rgba(0,255,159,0.4);
--  animation: iconPulse 3s ease infinite;
--}
--@keyframes iconPulse {
--  0%,100%{box-shadow:0 0 20px rgba(0,255,159,0.4)}
--  50%{box-shadow:0 0 40px rgba(0,255,159,0.7), 0 0 60px rgba(0,212,255,0.3)}
--}
--.nav-right {
--  display: flex; align-items: center; gap: 24px;
--}
--.live-badge {
--  display: flex; align-items: center; gap: 8px;
--  font-size: 0.72rem; font-weight: 600;
--  letter-spacing: 0.12em; text-transform: uppercase;
--  color: var(--green);
--  background: rgba(0,255,159,0.08);
--  border: 1px solid rgba(0,255,159,0.2);
--  border-radius: 99px;
--  padding: 6px 14px;
--}
--.live-dot {
--  width: 7px; height: 7px; border-radius: 50%;
--  background: var(--green);
--  box-shadow: 0 0 8px var(--green);
--  animation: livePulse 1.5s ease infinite;
--}
--@keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
--
--/* ── MAIN ── */
--main { position: relative; z-index: 2; }
--
--/* ── HERO ── */
--.hero {
--  min-height: 100vh;
--  display: flex; flex-direction: column;
--  align-items: center; justify-content: center;
--  text-align: center;
--  padding: 120px 24px 80px;
--  position: relative;
--}
--
--.hero-badge {
--  display: inline-flex; align-items: center; gap: 8px;
--  font-family: var(--font-head);
--  font-size: 0.62rem; font-weight: 600;
--  letter-spacing: 0.2em; text-transform: uppercase;
--  color: var(--cyan);
--  background: rgba(0,212,255,0.08);
--  border: 1px solid rgba(0,212,255,0.25);
--  border-radius: 99px;
--  padding: 8px 18px;
--  margin-bottom: 40px;
--  opacity: 0;
--}
--
--/* ── 3D ORB ── */
--.orb-container {
--  position: relative;
--  width: 280px; height: 280px;
--  margin: 0 auto 48px;
--  opacity: 0;
--}
--.orb-core {
--  position: absolute; inset: 40px;
--  border-radius: 50%;
--  background: radial-gradient(circle at 35% 35%,
--    rgba(0,255,159,0.6) 0%,
--    rgba(0,212,255,0.3) 40%,
--    rgba(123,47,255,0.2) 70%,
--    transparent 100%
--  );
--  box-shadow:
--    0 0 40px rgba(0,255,159,0.3),
--    0 0 80px rgba(0,212,255,0.2),
--    0 0 120px rgba(123,47,255,0.15),
--    inset 0 0 40px rgba(0,255,159,0.1);
--  animation: orbFloat 6s ease-in-out infinite, orbRotate 20s linear infinite;
--}
--@keyframes orbFloat {
--  0%,100%{transform:translateY(0) scale(1)}
--  50%{transform:translateY(-16px) scale(1.02)}
--}
--@keyframes orbRotate {
--  from{filter:hue-rotate(0deg)} to{filter:hue-rotate(360deg)}
--}
--.orb-ring {
--  position: absolute; inset: 0;
--  border-radius: 50%;
--  border: 1px solid rgba(0,255,159,0.2);
--  animation: orbRingRotate 8s linear infinite;
--}
--.orb-ring::before {
--  content: '';
--  position: absolute; top: -3px; left: 50%;
--  width: 6px; height: 6px;
--  border-radius: 50%;
--  background: var(--green);
--  box-shadow: 0 0 12px var(--green);
--  transform: translateX(-50%);
--}
--.orb-ring-2 {
--  position: absolute; inset: 20px;
--  border-radius: 50%;
--  border: 1px solid rgba(0,212,255,0.15);
--  animation: orbRingRotate 12s linear infinite reverse;
--}
--.orb-ring-2::before {
--  content: '';
--  position: absolute; top: -3px; left: 50%;
--  width: 5px; height: 5px;
--  border-radius: 50%;
--  background: var(--cyan);
--  box-shadow: 0 0 10px var(--cyan);
--  transform: translateX(-50%);
--}
--.orb-ring-3 {
--  position: absolute; inset: -20px;
--  border-radius: 50%;
--  border: 1px solid rgba(123,47,255,0.1);
--  animation: orbRingRotate 16s linear infinite;
--}
--@keyframes orbRingRotate { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
--
--.orb-glow {
--  position: absolute; inset: -40px;
--  border-radius: 50%;
--  background: radial-gradient(circle,
--    rgba(0,255,159,0.06) 0%,
--    rgba(0,212,255,0.04) 40%,
--    transparent 70%
--  );
--  animation: orbFloat 6s ease-in-out infinite;
--}
--
--.hero h1 {
--  font-family: var(--font-head);
--  font-size: clamp(2rem, 5vw, 4rem);
--  font-weight: 900;
--  line-height: 1.05;
--  letter-spacing: -0.02em;
--  margin-bottom: 20px;
--  opacity: 0;
--}
--.hero h1 .line1 { color: var(--text); }
--.hero h1 .line2 {
--  background: linear-gradient(90deg, var(--green), var(--cyan));
--  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
--  background-clip: text;
--  filter: drop-shadow(0 0 30px rgba(0,255,159,0.3));
--}
--
--.hero-sub {
--  font-size: 1.05rem; font-weight: 400;
--  color: var(--muted); line-height: 1.7;
--  max-width: 460px; margin: 0 auto 48px;
--  opacity: 0;
--}
--
--.hero-btns {
--  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
--  margin-bottom: 72px;
--  opacity: 0;
--}
--.btn-primary {
--  font-family: var(--font-head);
--  font-size: 0.72rem; font-weight: 700;
--  letter-spacing: 0.15em; text-transform: uppercase;
--  color: #000;
--  background: linear-gradient(90deg, var(--green), var(--cyan));
--  border: none; border-radius: 8px;
--  padding: 14px 28px;
--  cursor: none;
--  position: relative; overflow: hidden;
--  transition: transform 0.2s, box-shadow 0.2s;
--  box-shadow: 0 0 20px rgba(0,255,159,0.3);
--  text-decoration: none;
--  display: inline-flex; align-items: center; gap: 8px;
--}
--.btn-primary::before {
--  content: '';
--  position: absolute; inset: 0;
--  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
--  transform: translateX(-100%);
--  transition: transform 0.5s;
--}
--.btn-primary:hover::before { transform: translateX(100%); }
--.btn-primary:hover {
--  transform: translateY(-2px) scale(1.02);
--  box-shadow: 0 0 40px rgba(0,255,159,0.5), 0 8px 24px rgba(0,0,0,0.4);
--}
--.btn-secondary {
--  font-family: var(--font-head);
--  font-size: 0.72rem; font-weight: 700;
--  letter-spacing: 0.15em; text-transform: uppercase;
--  color: var(--cyan);
--  background: rgba(0,212,255,0.05);
--  border: 1px solid rgba(0,212,255,0.3);
--  border-radius: 8px;
--  padding: 14px 28px;
--  cursor: none;
--  transition: all 0.2s;
--  text-decoration: none;
--  display: inline-flex; align-items: center;
--}
--.btn-secondary:hover {
--  background: rgba(0,212,255,0.1);
--  border-color: var(--cyan);
--  box-shadow: 0 0 20px rgba(0,212,255,0.2);
--  transform: translateY(-2px);
--}
--
--/* ── HERO METRICS ── */
--.hero-metrics {
--  display: flex; gap: 1px;
--  background: var(--border);
--  border: 1px solid var(--border);
--  border-radius: 16px; overflow: hidden;
--  opacity: 0;
--}
--.metric {
--  flex: 1;
--  background: rgba(0,255,159,0.02);
--  backdrop-filter: blur(20px);
--  padding: 24px 32px;
--  text-align: center;
--  transition: background 0.3s;
--}
--.metric:hover { background: rgba(0,255,159,0.05); }
--.metric-val {
--  font-family: var(--font-head);
--  font-size: 1.8rem; font-weight: 900;
--  letter-spacing: -0.02em;
--  margin-bottom: 6px;
--}
--.metric-val.green {
--  color: var(--green);
--  text-shadow: 0 0 20px rgba(0,255,159,0.4);
--}
--.metric-val.cyan {
--  color: var(--cyan);
--  text-shadow: 0 0 20px rgba(0,212,255,0.4);
--}
--.metric-label {
--  font-size: 0.72rem; font-weight: 600;
--  letter-spacing: 0.1em; text-transform: uppercase;
--  color: var(--muted);
--}
--
--/* ── SECTION ── */
--.section {
--  max-width: 1200px; margin: 0 auto;
--  padding: 80px 32px;
--}
--.section-head {
--  display: flex; align-items: center; justify-content: space-between;
--  margin-bottom: 32px;
--}
--.section-title {
--  font-family: var(--font-head);
--  font-size: 0.85rem; font-weight: 700;
--  letter-spacing: 0.2em; text-transform: uppercase;
--  color: var(--green);
--  display: flex; align-items: center; gap: 12px;
--}
--.section-title::before {
--  content: '';
--  width: 3px; height: 18px;
--  background: linear-gradient(to bottom, var(--green), transparent);
--  border-radius: 2px;
--}
--.count-badge {
--  font-family: 'Rajdhani', sans-serif;
--  font-size: 0.75rem; font-weight: 600;
--  background: rgba(0,255,159,0.1);
--  border: 1px solid rgba(0,255,159,0.25);
--  color: var(--green);
--  border-radius: 99px;
--  padding: 3px 12px;
--}
--
--/* ── GLASS CARD ── */
--.glass {
--  background: rgba(0,255,159,0.02);
--  backdrop-filter: blur(20px);
--  border: 1px solid var(--border);
--  border-radius: 16px;
--  transition: all 0.3s;
--}
--.glass:hover {
--  border-color: rgba(0,255,159,0.25);
--  box-shadow: 0 0 40px rgba(0,255,159,0.05), 0 20px 60px rgba(0,0,0,0.4);
--  transform: translateY(-4px) perspective(1000px) rotateX(1deg);
--}
--
--/* ── SIGNAL CARDS ── */
--.signals-grid {
--  display: grid;
--  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
--  gap: 16px;
--}
--.signal-card {
--  background: rgba(0,255,159,0.02);
--  border: 1px solid var(--border);
--  border-radius: 16px;
--  padding: 24px;
--  position: relative; overflow: hidden;
--  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
--  cursor: none;
--}
--.signal-card::before {
--  content: '';
--  position: absolute; top: 0; left: 0; right: 0; height: 1px;
--}
--.signal-card.long::before { background: linear-gradient(90deg, var(--green), transparent); }
--.signal-card.short::before { background: linear-gradient(90deg, #ff3b5c, transparent); }
--
--.signal-card::after {
--  content: '';
--  position: absolute; inset: 0;
--  background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(0,255,159,0.06), transparent 60%);
--  opacity: 0;
--  transition: opacity 0.3s;
--  pointer-events: none;
--}
--.signal-card:hover::after { opacity: 1; }
--
--.signal-card:hover {
--  border-color: rgba(0,255,159,0.3);
--  box-shadow: 0 0 40px rgba(0,255,159,0.08), 0 20px 60px rgba(0,0,0,0.5);
--  transform: perspective(800px) rotateX(2deg) rotateY(1deg) translateY(-6px);
--}
--
--.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
--.card-symbol {
--  font-family: var(--font-head);
--  font-size: 1.2rem; font-weight: 900;
--  letter-spacing: 0.05em;
--  color: var(--text);
--}
--.card-symbol span { color: var(--muted); font-size: 0.8rem; font-weight: 400; margin-left: 4px; }
--
--.dir-badge {
--  font-family: var(--font-head);
--  font-size: 0.65rem; font-weight: 700;
--  letter-spacing: 0.15em;
--  padding: 5px 12px; border-radius: 6px;
--}
--.dir-badge.long {
--  background: rgba(0,255,159,0.1);
--  border: 1px solid rgba(0,255,159,0.3);
--  color: var(--green);
--  box-shadow: 0 0 12px rgba(0,255,159,0.1);
--}
--.dir-badge.short {
--  background: rgba(255,59,92,0.1);
--  border: 1px solid rgba(255,59,92,0.3);
--  color: #ff3b5c;
--  box-shadow: 0 0 12px rgba(255,59,92,0.1);
--}
--
--.price-row {
--  display: grid; grid-template-columns: 1fr 1fr 1fr;
--  gap: 16px; margin-bottom: 20px;
--}
--.price-item label {
--  display: block; font-size: 0.65rem; font-weight: 600;
--  letter-spacing: 0.1em; text-transform: uppercase;
--  color: var(--muted); margin-bottom: 6px;
--}
--.price-item .pval {
--  font-family: var(--font-head);
--  font-size: 0.88rem; font-weight: 700;
--}
--.price-item .pval.entry { color: var(--cyan); }
--.price-item .pval.sl    { color: #ff3b5c; }
--.price-item .pval.tp    { color: var(--green); }
--
--.card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid rgba(0,255,159,0.07); }
--.conf-wrap { flex: 1; margin-right: 16px; }
--.conf-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
--.conf-track { height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
--.conf-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--green), var(--cyan)); box-shadow: 0 0 8px rgba(0,255,159,0.4); transition: width 1.5s cubic-bezier(0.23,1,0.32,1); }
--.tf-tag {
--  font-family: var(--font-head);
--  font-size: 0.6rem; font-weight: 700;
--  letter-spacing: 0.15em;
--  color: var(--muted);
--  background: rgba(255,255,255,0.03);
--  border: 1px solid rgba(255,255,255,0.06);
--  border-radius: 6px; padding: 4px 10px;
--}
--
--/* ── HISTORY TABLE ── */
--.table-wrap {
--  background: rgba(0,255,159,0.01);
--  border: 1px solid var(--border);
--  border-radius: 16px; overflow: hidden;
--}
--table { width: 100%; border-collapse: collapse; }
--thead tr { background: rgba(0,255,159,0.03); }
--th {
--  text-align: left; padding: 16px 20px;
--  font-family: var(--font-head);
--  font-size: 0.6rem; font-weight: 700;
--  letter-spacing: 0.15em; text-transform: uppercase;
--  color: var(--muted);
--  border-bottom: 1px solid var(--border);
--}
--td {
--  padding: 16px 20px; font-size: 0.9rem; font-weight: 500;
--  border-bottom: 1px solid rgba(0,255,159,0.04);
--  vertical-align: middle;
--  transition: background 0.2s;
--}
--tr:last-child td { border-bottom: none; }
--tbody tr { transition: background 0.2s; }
--tbody tr:hover td { background: rgba(0,255,159,0.02); }
--
--.pill {
--  display: inline-flex; align-items: center;
--  font-family: var(--font-head);
--  font-size: 0.6rem; font-weight: 700;
--  letter-spacing: 0.1em; text-transform: uppercase;
--  padding: 4px 10px; border-radius: 6px;
--}
--.pill.long   { background: rgba(0,255,159,0.1); color: var(--green); border: 1px solid rgba(0,255,159,0.2); }
--.pill.short  { background: rgba(255,59,92,0.1); color: #ff3b5c;      border: 1px solid rgba(255,59,92,0.2); }
--.pill.hit_tp { background: rgba(0,255,159,0.1); color: var(--green); border: 1px solid rgba(0,255,159,0.2); }
--.pill.hit_sl { background: rgba(255,59,92,0.1); color: #ff3b5c;      border: 1px solid rgba(255,59,92,0.2); }
--.pill.active { background: rgba(0,212,255,0.1); color: var(--cyan);  border: 1px solid rgba(0,212,255,0.2); }
--
--.pnl-pos { color: var(--green); font-weight: 700; text-shadow: 0 0 12px rgba(0,255,159,0.3); }
--.pnl-neg { color: #ff3b5c;      font-weight: 700; }
--
--/* ── LIVE FEED TICKER ── */
--.ticker-wrap {
--  overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
--  background: rgba(0,0,0,0.4); padding: 12px 0;
--  position: relative; z-index: 2;
--}
--.ticker-wrap::before, .ticker-wrap::after {
--  content: '';
--  position: absolute; top: 0; width: 120px; height: 100%; z-index: 2;
--  pointer-events: none;
--}
--.ticker-wrap::before { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
--.ticker-wrap::after  { right: 0; background: linear-gradient(-90deg, var(--bg), transparent); }
--
--.ticker-track {
--  display: flex; gap: 48px;
--  animation: tickerScroll 30s linear infinite;
--  white-space: nowrap; width: max-content;
--}
--@keyframes tickerScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
--
--.tick-item {
--  display: flex; align-items: center; gap: 10px;
--  font-family: var(--font-head); font-size: 0.72rem; font-weight: 700;
--  letter-spacing: 0.08em;
--}
--.tick-symbol { color: var(--text); }
--.tick-dir.long  { color: var(--green); }
--.tick-dir.short { color: #ff3b5c; }
--.tick-conf { color: var(--muted); }
--.tick-sep { color: rgba(255,255,255,0.1); }
--
--/* ── EMPTY ── */
--.empty-state {
--  text-align: center; padding: 80px 24px;
--  color: var(--muted);
--}
--.empty-icon {
--  font-size: 2.5rem; margin-bottom: 16px;
--  filter: grayscale(0.5);
--  animation: emptyFloat 3s ease-in-out infinite;
--}
--@keyframes emptyFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
--.empty-text { font-size: 0.9rem; font-weight: 500; color: var(--muted); }
--
--/* ── FOOTER ── */
--footer {
--  position: relative; z-index: 2;
--  border-top: 1px solid var(--border);
--  padding: 40px 32px; text-align: center;
--}
--.footer-logo {
--  font-family: var(--font-head);
--  font-size: 1rem; font-weight: 900;
--  letter-spacing: 0.15em;
--  color: var(--green);
--  text-shadow: 0 0 20px rgba(0,255,159,0.3);
--  margin-bottom: 16px;
--}
--.footer-text { font-size: 0.78rem; color: var(--muted); line-height: 1.7; }
--
--/* ── LOADING STATE ── */
--.loading-shimmer {
--  background: linear-gradient(90deg,
--    rgba(0,255,159,0.03) 25%,
--    rgba(0,255,159,0.08) 50%,
--    rgba(0,255,159,0.03) 75%
--  );
--  background-size: 200% 100%;
--  animation: shimmer 2s infinite;
--  border-radius: 8px; height: 200px;
--}
--@keyframes shimmer { from{background-position:200% 0} to{background-position:-200% 0} }
--
--/* ── SCROLL FADE ── */
--.fade-up { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.23,1,0.32,1); }
--.fade-up.visible { opacity: 1; transform: none; }
--
--/* ── MOBILE ── */
--@media(max-width:768px) {
--  .hero-metrics { flex-direction: column; }
--  .signals-grid { grid-template-columns: 1fr; }
--  .nav-right .live-badge { display: none; }
--  .hide-m { display: none; }
--  .section { padding: 60px 20px; }
--  .orb-container { width: 200px; height: 200px; }
--}
--</style>
--</head>
--<body>
--
--<!-- CUSTOM CURSOR -->
--<div id="cursor">
--  <div class="cursor-ring"></div>
--  <div class="cursor-dot"></div>
--</div>
--
--<!-- 3D CANVAS -->
--<canvas id="bg-canvas"></canvas>
--
--<!-- NAV -->
--<nav>
--  <div class="nav-inner">
--    <a href="#" class="logo">
--      <div class="logo-icon">⚡</div>
--      EDGE<span style="color:var(--cyan)">X</span>
--    </a>
--    <div class="nav-right">
--      <div class="live-badge">
--        <span class="live-dot"></span>
--        AI • Live
--      </div>
--      <div id="nav-count" style="font-family:var(--font-head);font-size:0.7rem;letter-spacing:0.1em;color:var(--muted)">
--        — SIGNALS
--      </div>
--    </div>
--  </div>
--</nav>
--
--<main>
--
--<!-- HERO -->
--<section class="hero">
--  <div class="hero-badge" id="hero-badge">
--    <span class="live-dot"></span>
--    AI-Powered &nbsp;•&nbsp; Multi-Indicator &nbsp;•&nbsp; Live Signals
--  </div>
--
--  <div class="orb-container" id="hero-orb">
--    <div class="orb-glow"></div>
--    <div class="orb-ring-3"></div>
--    <div class="orb-ring"></div>
--    <div class="orb-ring-2"></div>
--    <div class="orb-core"></div>
--  </div>
--
--  <h1 id="hero-h1">
--    <div class="line1">Real Signals.</div>
--    <div class="line2">Real Results.</div>
--  </h1>
--
--  <p class="hero-sub" id="hero-sub">
--    AI-powered crypto trading signals with full transparency —
--    entry, exit, and stop-loss powered by 5–6 indicator confluence
--    and live social sentiment analysis.
--  </p>
--
--  <div class="hero-btns" id="hero-btns">
--    <a href="#signals" class="btn-primary">⚡ View Live Signals</a>
--    <a href="#history" class="btn-secondary">Signal History →</a>
--  </div>
--
--  <div class="hero-metrics" id="hero-metrics">
--    <div class="metric">
--      <div class="metric-val cyan" id="m-active">—</div>
--      <div class="metric-label">Active Signals</div>
--    </div>
--    <div class="metric">
--      <div class="metric-val green" id="m-winrate">—</div>
--      <div class="metric-label">Win Rate</div>
--    </div>
--    <div class="metric">
--      <div class="metric-val" id="m-pnl">—</div>
--      <div class="metric-label">Total P&L</div>
--    </div>
--    <div class="metric">
--      <div class="metric-val" id="m-total" style="color:var(--text)">—</div>
--      <div class="metric-label">All Time</div>
--    </div>
--  </div>
--</section>
--
--<!-- TICKER -->
--<div class="ticker-wrap" id="ticker-wrap">
--  <div class="ticker-track" id="ticker-track">
--    <!-- filled by JS -->
--  </div>
--</div>
--
--<!-- ACTIVE SIGNALS -->
--<section class="section fade-up" id="signals">
--  <div class="section-head">
--    <div class="section-title">
--      Active Signals
--      <span class="count-badge" id="active-badge">0</span>
--    </div>
--    <button onclick="loadData()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-head);font-size:0.65rem;letter-spacing:0.1em;padding:8px 16px;border-radius:8px;cursor:none;transition:all 0.2s" onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
--      ↻ REFRESH
--    </button>
--  </div>
--  <div class="signals-grid" id="active-signals">
--    <div class="loading-shimmer"></div>
--    <div class="loading-shimmer" style="opacity:0.5"></div>
--  </div>
--</section>
--
--<!-- HISTORY -->
--<section class="section fade-up" id="history">
--  <div class="section-head">
--    <div class="section-title">
--      Signal History
--      <span class="count-badge" id="history-badge">0</span>
--    </div>
--  </div>
--  <div class="table-wrap">
--    <table>
--      <thead>
--        <tr>
--          <th>Symbol</th>
--          <th>Dir</th>
--          <th>Entry</th>
--          <th class="hide-m">SL</th>
--          <th class="hide-m">TP</th>
--          <th>P&L</th>
--          <th>Result</th>
--          <th class="hide-m">TF</th>
--          <th class="hide-m">Date</th>
--        </tr>
--      </thead>
--      <tbody id="history-body">
--        <tr><td colspan="9" style="padding:0"><div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-text">Loading signal history…</div></div></td></tr>
--      </tbody>
--    </table>
--  </div>
--</section>
--
--</main>
--
--<footer>
--  <div class="footer-logo">EDGE<span style="color:var(--cyan)">X</span></div>
--  <div class="footer-text">
--    ⚠ Cryptocurrency trading involves substantial risk.<br/>
--    Past performance does not guarantee future results. Trade responsibly.
--  </div>
--</footer>
--
--<script>
--// ═══════════════════════════════════════════════
--// THREE.JS BACKGROUND
--// ═══════════════════════════════════════════════
--(function() {
--  const canvas = document.getElementById('bg-canvas');
--  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
--  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
--  renderer.setSize(window.innerWidth, window.innerHeight);
--  renderer.setClearColor(0x000000, 0);
--
--  const scene = new THREE.Scene();
--  const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
--  camera.position.set(0, 0, 80);
--
--  // PARTICLES
--  const particleCount = 1200;
--  const positions = new Float32Array(particleCount * 3);
--  const colors    = new Float32Array(particleCount * 3);
--  const sizes     = new Float32Array(particleCount);
--
--  for (let i = 0; i < particleCount; i++) {
--    positions[i*3]   = (Math.random()-0.5)*300;
--    positions[i*3+1] = (Math.random()-0.5)*200;
--    positions[i*3+2] = (Math.random()-0.5)*150;
--    const t = Math.random();
--    if (t < 0.5) { colors[i*3]=0; colors[i*3+1]=1; colors[i*3+2]=0.62; }
--    else if(t<0.8){ colors[i*3]=0; colors[i*3+1]=0.83; colors[i*3+2]=1; }
--    else { colors[i*3]=0.48; colors[i*3+1]=0.18; colors[i*3+2]=1; }
--    sizes[i] = Math.random() * 1.5 + 0.3;
--  }
--
--  const geo = new THREE.BufferGeometry();
--  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
--  geo.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
--  geo.setAttribute('size',     new THREE.BufferAttribute(sizes, 1));
--
--  const mat = new THREE.PointsMaterial({
--    size: 0.8, vertexColors: true, transparent: true, opacity: 0.6,
--    sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false
--  });
--  const particles = new THREE.Points(geo, mat);
--  scene.add(particles);
--
--  // GRID
--  const gridMat = new THREE.LineBasicMaterial({
--    color: 0x00ff9f, transparent: true, opacity: 0.04,
--    blending: THREE.AdditiveBlending
--  });
--  const gridGroup = new THREE.Group();
--  for(let i=-20; i<=20; i++) {
--    const hg = new THREE.BufferGeometry().setFromPoints([
--      new THREE.Vector3(-200,i*8,0), new THREE.Vector3(200,i*8,0)
--    ]);
--    gridGroup.add(new THREE.Line(hg, gridMat));
--    const vg = new THREE.BufferGeometry().setFromPoints([
--      new THREE.Vector3(i*10,-160,0), new THREE.Vector3(i*10,160,0)
--    ]);
--    gridGroup.add(new THREE.Line(vg, gridMat));
--  }
--  gridGroup.position.z = -40;
--  scene.add(gridGroup);
--
--  // DATA STREAMS
--  const streamGroup = new THREE.Group();
--  const streamMat = new THREE.LineBasicMaterial({
--    color: 0x00d4ff, transparent: true, opacity: 0.15,
--    blending: THREE.AdditiveBlending
--  });
--  for(let i=0; i<8; i++) {
--    const pts = [];
--    const sx = (Math.random()-0.5)*300;
--    for(let j=0; j<20; j++) pts.push(new THREE.Vector3(sx+(Math.random()-0.5)*20, -100+j*10, (Math.random()-0.5)*20));
--    const sg = new THREE.BufferGeometry().setFromPoints(pts);
--    streamGroup.add(new THREE.Line(sg, streamMat));
--  }
--  scene.add(streamGroup);
--
--  let mx=0, my=0;
--  document.addEventListener('mousemove', e => {
--    mx = (e.clientX/window.innerWidth-0.5)*2;
--    my = (e.clientY/window.innerHeight-0.5)*2;
--  });
--
--  let t = 0;
--  function animate() {
--    requestAnimationFrame(animate);
--    t += 0.005;
--    particles.rotation.y = t * 0.08;
--    particles.rotation.x = t * 0.03;
--    gridGroup.position.y = Math.sin(t)*3;
--    camera.position.x += (mx*8 - camera.position.x) * 0.03;
--    camera.position.y += (-my*4 - camera.position.y) * 0.03;
--    camera.lookAt(0,0,0);
--    renderer.render(scene, camera);
--  }
--  animate();
--
--  window.addEventListener('resize', () => {
--    camera.aspect = window.innerWidth/window.innerHeight;
--    camera.updateProjectionMatrix();
--    renderer.setSize(window.innerWidth, window.innerHeight);
--  });
--})();
--
--// ═══════════════════════════════════════════════
--// CURSOR
--// ═══════════════════════════════════════════════
--(function(){
--  const cursor = document.getElementById('cursor');
--  const dot    = cursor.querySelector('.cursor-dot');
--  const ring   = cursor.querySelector('.cursor-ring');
--  let rx=0,ry=0,dx=0,dy=0;
--  document.addEventListener('mousemove', e=>{
--    dx=e.clientX; dy=e.clientY;
--    dot.style.left = dx+'px'; dot.style.top = dy+'px';
--  });
--  function updateRing() {
--    rx += (dx-rx)*0.12; ry += (dy-ry)*0.12;
--    ring.style.left=rx+'px'; ring.style.top=ry+'px';
--    requestAnimationFrame(updateRing);
--  }
--  updateRing();
--})();
--
--// ═══════════════════════════════════════════════
--// GSAP HERO ENTRANCE
--// ═══════════════════════════════════════════════
--gsap.registerPlugin(ScrollTrigger);
--gsap.timeline({ delay: 0.2 })
--  .to('#hero-badge',   { opacity:1, y:0, duration:0.8, ease:'power3.out' })
--  .to('#hero-orb',     { opacity:1, duration:1, ease:'power2.out' }, '-=0.4')
--  .to('#hero-h1',      { opacity:1, y:0, duration:0.8, ease:'power3.out' }, '-=0.5')
--  .to('#hero-sub',     { opacity:1, y:0, duration:0.7, ease:'power3.out' }, '-=0.5')
--  .to('#hero-btns',    { opacity:1, y:0, duration:0.6, ease:'power3.out' }, '-=0.4')
--  .to('#hero-metrics', { opacity:1, y:0, duration:0.6, ease:'power3.out' }, '-=0.3');
--
--// Scroll fade
--const fadeEls = document.querySelectorAll('.fade-up');
--const obs = new IntersectionObserver(entries => {
--  entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
--}, { threshold: 0.1 });
--fadeEls.forEach(el => obs.observe(el));
--
--// Card tilt on mouse move
--document.addEventListener('mousemove', e => {
--  document.querySelectorAll('.signal-card').forEach(card => {
--    const r = card.getBoundingClientRect();
--    const cx = r.left + r.width/2, cy = r.top + r.height/2;
--    const dx = ((e.clientX-cx)/r.width)*100;
--    const dy = ((e.clientY-cy)/r.height)*100;
--    card.style.setProperty('--mx', (50+dx*0.3)+'%');
--    card.style.setProperty('--my', (50+dy*0.3)+'%');
--  });
--});
--
--// ═══════════════════════════════════════════════
--// DATA
--// ═══════════════════════════════════════════════
--const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
--const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
--
--const DEMO_MODE = (SUPABASE_URL === 'YOUR_SUPABASE_URL_HERE');
--
--const DEMO_SIGNALS = [
--  { id:'1', symbol:'BTC/USDT', direction:'LONG', entry_price:65420, sl_price:63800, tp_price:68500, confidence:0.84, timeframe:'1h', status:'ACTIVE', created_at: new Date().toISOString() },
--  { id:'2', symbol:'ETH/USDT', direction:'SHORT', entry_price:3240, sl_price:3380, tp_price:3020, confidence:0.71, timeframe:'4h', status:'ACTIVE', created_at: new Date().toISOString() },
--  { id:'3', symbol:'SOL/USDT', direction:'LONG', entry_price:168, sl_price:161, tp_price:182, confidence:0.77, timeframe:'1h', status:'ACTIVE', created_at: new Date().toISOString() },
--  { id:'4', symbol:'BTC/USDT', direction:'LONG', entry_price:62100, sl_price:60500, tp_price:65000, confidence:0.81, timeframe:'4h', status:'HIT_TP', pnl_pct:4.67, closed_at: new Date(Date.now()-86400000).toISOString() },
--  { id:'5', symbol:'ETH/USDT', direction:'SHORT', entry_price:3480, sl_price:3600, tp_price:3200, confidence:0.69, timeframe:'1h', status:'HIT_TP', pnl_pct:8.05, closed_at: new Date(Date.now()-172800000).toISOString() },
--  { id:'6', symbol:'BNB/USDT', direction:'LONG', entry_price:412, sl_price:398, tp_price:435, confidence:0.62, timeframe:'30m', status:'HIT_SL', pnl_pct:-3.4, closed_at: new Date(Date.now()-259200000).toISOString() },
--  { id:'7', symbol:'SOL/USDT', direction:'SHORT', entry_price:185, sl_price:195, tp_price:168, confidence:0.75, timeframe:'4h', status:'HIT_TP', pnl_pct:9.19, closed_at: new Date(Date.now()-345600000).toISOString() },
--  { id:'8', symbol:'AVAX/USDT', direction:'LONG', entry_price:38.5, sl_price:36.2, tp_price:43, confidence:0.68, timeframe:'1h', status:'HIT_SL', pnl_pct:-5.97, closed_at: new Date(Date.now()-432000000).toISOString() },
--];
--
--async function fetchSignals() {
--  if (DEMO_MODE) return DEMO_SIGNALS;
--  const res = await fetch(`${SUPABASE_URL}/rest/v1/signals?select=*&order=created_at.desc`, {
--    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
--  });
--  return await res.json();
--}
--
--function fmt(n, d=2) {
--  if (n == null || n === '') return '—';
--  const v = Number(n);
--  if (v >= 1000) return v.toLocaleString(undefined, { maximumFractionDigits: 2 });
--  return v.toFixed(d);
--}
--
--function animateNum(el, to, suffix='', decimals=0) {
--  let from = 0;
--  const start = performance.now();
--  const dur = 1400;
--  function step(now) {
--    const p = Math.min((now-start)/dur, 1);
--    const eased = 1 - Math.pow(1-p, 4);
--    const val = from + (to-from)*eased;
--    el.textContent = (decimals>0 ? val.toFixed(decimals) : Math.round(val)) + suffix;
--    if(p<1) requestAnimationFrame(step);
--  }
--  requestAnimationFrame(step);
--}
--
--function buildTicker(signals) {
--  const track = document.getElementById('ticker-track');
--  const items = signals.slice(0,8).map(s => {
--    const dir = (s.direction||'').toLowerCase();
--    const conf = Math.round((s.confidence||0)*100);
--    return `<div class="tick-item">
--      <span class="tick-symbol">${s.symbol||'?'}</span>
--      <span class="tick-sep">|</span>
--      <span class="tick-dir ${dir}">${s.direction||'—'}</span>
--      <span class="tick-conf">${conf}% CONF</span>
--    </div>`;
--  }).join('<span class="tick-sep" style="color:rgba(255,255,255,0.08)">———</span>');
--  // duplicate for seamless loop
--  track.innerHTML = items + items;
--}
--
--function renderActive(active) {
--  const el = document.getElementById('active-signals');
--  document.getElementById('active-badge').textContent = active.length;
--  if (!active.length) {
--    el.innerHTML = `<div style="grid-column:1/-1"><div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">No active signals. Bot is scanning markets…</div></div></div>`;
--    return;
--  }
--  el.innerHTML = active.map((s,i) => {
--    const dir  = (s.direction||'').toLowerCase();
--    const conf = Math.round((s.confidence||0)*100);
--    return `<div class="signal-card ${dir}" style="animation-delay:${i*0.1}s">
--      <div class="card-header">
--        <div class="card-symbol">${s.symbol||'—'}</div>
--        <div class="dir-badge ${dir}">${s.direction||'—'}</div>
--      </div>
--      <div class="price-row">
--        <div class="price-item"><label>Entry</label><div class="pval entry">${fmt(s.entry_price)}</div></div>
--        <div class="price-item"><label>Stop Loss</label><div class="pval sl">${fmt(s.sl_price)}</div></div>
--        <div class="price-item"><label>Take Profit</label><div class="pval tp">${fmt(s.tp_price)}</div></div>
--      </div>
--      <div class="card-footer">
--        <div class="conf-wrap">
--          <div class="conf-label">Confidence: ${conf}%</div>
--          <div class="conf-track"><div class="conf-fill" style="width:0%" data-conf="${conf}"></div></div>
--        </div>
--        <div class="tf-tag">${s.timeframe||'—'}</div>
--      </div>
--    </div>`;
--  }).join('');
--
--  // animate confidence bars
--  setTimeout(() => {
--    document.querySelectorAll('.conf-fill[data-conf]').forEach(bar => {
--      bar.style.width = bar.dataset.conf + '%';
--    });
--  }, 100);
--}
--
--function renderHistory(closed) {
--  const tbody = document.getElementById('history-body');
--  document.getElementById('history-badge').textContent = closed.length;
--  if (!closed.length) {
--    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No closed signals yet.</div></div></td></tr>`;
--    return;
--  }
--  tbody.innerHTML = closed.slice(0,30).map(s => {
--    const dir    = (s.direction||'').toLowerCase();
--    const status = (s.status||'').toLowerCase();
--    const pnl    = s.pnl_pct != null ? Number(s.pnl_pct).toFixed(2) : null;
--    const pnlHtml = pnl != null
--      ? `<span class="${pnl>=0?'pnl-pos':'pnl-neg'}">${pnl>=0?'+':''}${pnl}%</span>`
--      : '—';
--    const date = s.closed_at ? new Date(s.closed_at).toLocaleDateString() : '—';
--    return `<tr>
--      <td style="font-family:var(--font-head);font-size:0.85rem;font-weight:700;letter-spacing:0.05em">${s.symbol||'—'}</td>
--      <td><span class="pill ${dir}">${s.direction||'—'}</span></td>
--      <td>${fmt(s.entry_price)}</td>
--      <td class="hide-m" style="color:#ff3b5c">${fmt(s.sl_price)}</td>
--      <td class="hide-m" style="color:var(--green)">${fmt(s.tp_price)}</td>
--      <td>${pnlHtml}</td>
--      <td><span class="pill ${status}">${s.status||'—'}</span></td>
--      <td class="hide-m" style="color:var(--muted);font-family:var(--font-head);font-size:0.7rem">${s.timeframe||'—'}</td>
--      <td class="hide-m" style="color:var(--muted)">${date}</td>
--    </tr>`;
--  }).join('');
--}
--
--function renderStats(all, active, closed) {
--  const winners = closed.filter(s => (s.pnl_pct||0) > 0);
--  const wr      = closed.length ? (winners.length/closed.length*100) : 0;
--  const totalPnl = closed.reduce((sum,s) => sum+(s.pnl_pct||0), 0);
--
--  animateNum(document.getElementById('m-active'), active.length);
--  if (closed.length) {
--    animateNum(document.getElementById('m-winrate'), wr, '%', 1);
--    const pnlEl = document.getElementById('m-pnl');
--    pnlEl.className = 'metric-val ' + (totalPnl>=0?'green':'');
--    if (totalPnl<0) pnlEl.style.color='#ff3b5c';
--    animateNum(pnlEl, totalPnl, '%', 2);
--  } else {
--    document.getElementById('m-winrate').textContent = '—';
--    document.getElementById('m-pnl').textContent = '—';
--  }
--  animateNum(document.getElementById('m-total'), all.length);
--  document.getElementById('nav-count').textContent = active.length + ' SIGNALS';
--}
--
--async function loadData() {
--  try {
--    const data   = await fetchSignals();
--    const active = data.filter(s => s.status === 'ACTIVE');
--    const closed = data.filter(s => s.status !== 'ACTIVE');
--    renderStats(data, active, closed);
--    renderActive(active);
--    renderHistory(closed);
--    buildTicker(data);
--  } catch(e) {
--    console.error(e);
--    document.getElementById('active-signals').innerHTML =
--      `<div style="grid-column:1/-1"><div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Error loading signals. Check console.</div></div></div>`;
--  }
--}
--
--loadData();
--setInterval(loadData, 60000);
--
--if(DEMO_MODE) {
--  const banner = document.createElement('div');
--  banner.style.cssText='position:fixed;bottom:20px;right:20px;z-index:999;background:rgba(123,47,255,0.15);border:1px solid rgba(123,47,255,0.4);border-radius:10px;padding:10px 16px;font-family:var(--font-head);font-size:0.62rem;letter-spacing:0.1em;color:#a06fff;backdrop-filter:blur(12px)';
--  banner.textContent='⚡ DEMO MODE — Connect Supabase to go live';
--  document.body.appendChild(banner);
--}
--</script>
--</body>
-+  <head>
-+    <meta charset="UTF-8" />
-+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-+    <title>TRADAI — AI Crypto Signals</title>
-+    <script src="https://cdn.tailwindcss.com"></script>
-+    <script>
-+      tailwind.config = {
-+        theme: {
-+          extend: {
-+            colors: {
-+              tradai: {
-+                bg: '#02050a',
-+                panel: 'rgba(8, 22, 31, 0.55)',
-+                neon: '#24ffd2',
-+                lime: '#8bff5b',
-+                blue: '#44c7ff',
-+                danger: '#ff607d'
-+              }
-+            },
-+            boxShadow: {
-+              neon: '0 0 40px rgba(36,255,210,.28)',
-+              lime: '0 0 34px rgba(139,255,91,.25)'
-+            },
-+            borderRadius: {
-+              xl2: '1rem'
-+            }
-+          }
-+        }
-+      }
-+    </script>
-+    <style>
-+      body {
-+        background: radial-gradient(circle at 50% -20%, #123742 0%, #050913 45%, #02050a 74%);
-+        color: #dcfbf6;
-+      }
-+      .glass {
-+        background: rgba(8, 22, 31, 0.55);
-+        backdrop-filter: blur(14px);
-+        border: 1px solid rgba(68, 199, 255, 0.22);
-+      }
-+      .grid-bg::before {
-+        content: '';
-+        position: absolute;
-+        inset: 0;
-+        background-image: linear-gradient(rgba(36,255,210,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(36,255,210,.08) 1px, transparent 1px);
-+        background-size: 38px 38px;
-+        opacity: .3;
-+        pointer-events: none;
-+      }
-+      .orb {
-+        background: radial-gradient(circle at 30% 30%, #c1fff6 0%, #24ffd2 26%, #1b5f85 58%, #04111d 100%);
-+        animation: bob 6s ease-in-out infinite;
-+      }
-+      .ring { animation: spin 10s linear infinite; }
-+      .ring.r2 { animation-direction: reverse; animation-duration: 14s; }
-+      .scan {
-+        background: linear-gradient(90deg, transparent, rgba(36,255,210,.2), transparent);
-+        animation: sweep 2.2s linear infinite;
-+      }
-+      .pulse-live { animation: pulse 1.2s infinite; }
-+      .card-lift { transition: transform .24s, box-shadow .24s; }
-+      .card-lift:hover { transform: translateY(-6px); box-shadow: 0 0 40px rgba(36,255,210,.2); }
-+      @keyframes spin { to { transform: rotate(360deg); } }
-+      @keyframes bob { 0%,100%{ transform: translateY(0)} 50%{ transform: translateY(-14px)} }
-+      @keyframes sweep { from { transform: translateX(-120%);} to { transform: translateX(120%);} }
-+      @keyframes pulse { 50% { opacity:.35; transform: scale(.75);} }
-+    </style>
-+  </head>
-+  <body class="min-h-screen font-sans">
-+    <div id="root"></div>
-+
-+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-+    <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.min.js"></script>
-+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-+
-+    <script type="text/babel">
-+      const { useEffect, useMemo, useState } = React;
-+      const {
-+        ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Area, AreaChart
-+      } = Recharts;
-+
-+      const performanceData = [
-+        { d: 'W1', equity: 100 }, { d: 'W2', equity: 107 }, { d: 'W3', equity: 113 },
-+        { d: 'W4', equity: 110 }, { d: 'W5', equity: 121 }, { d: 'W6', equity: 129 },
-+        { d: 'W7', equity: 138 }, { d: 'W8', equity: 146 }, { d: 'W9', equity: 151 }, { d: 'W10', equity: 160 }
-+      ];
-+
-+      const liveSignals = [
-+        { pair:'BTC/USDT', direction:'LONG', entry:'65,420', sl:'63,800', tp:'68,500', confidence:84, expires:'1h', why:'RSI oversold + volume breakout + trendline support' },
-+        { pair:'ETH/USDT', direction:'SHORT', entry:'3,240', sl:'3,380', tp:'3,020', confidence:76, expires:'2h', why:'Bearish divergence + rejection at resistance + funding skew' },
-+        { pair:'SOL/USDT', direction:'LONG', entry:'168', sl:'161', tp:'182', confidence:71, expires:'47m', why:'Momentum reclaim + bullish orderflow + social sentiment spike' },
-+        { pair:'XRP/USDT', direction:'SHORT', entry:'0.89', sl:'0.93', tp:'0.82', confidence:68, expires:'1h 12m', why:'Failed breakout + MACD rollover + liquidity sweep' },
-+      ];
-+
-+      const historyRows = [
-+        ['BTC/USDT','LONG','65,420','63,800','68,500','TP','+4.7%'],
-+        ['ETH/USDT','SHORT','3,240','3,380','3,020','TP','+6.8%'],
-+        ['SOL/USDT','LONG','168','161','182','SL','-4.1%'],
-+        ['BTC/USDT','SHORT','67,020','67,980','64,900','SL','-2.8%'],
-+        ['ETH/USDT','LONG','3,110','3,040','3,320','TP','+5.2%']
-+      ];
-+
-+      function ParticleBg() {
-+        useEffect(() => {
-+          const canvas = document.getElementById('particles');
-+          const ctx = canvas.getContext('2d');
-+          let dots = [];
-+          const make = () => Array.from({length: 95}, () => ({
-+            x: Math.random() * innerWidth,
-+            y: Math.random() * innerHeight,
-+            vx: (Math.random() - 0.5) * 0.35,
-+            vy: (Math.random() - 0.5) * 0.35,
-+            r: Math.random() * 1.8 + 0.5
-+          }));
-+          const resize = () => {
-+            canvas.width = innerWidth;
-+            canvas.height = innerHeight;
-+            dots = make();
-+          };
-+          const tick = () => {
-+            ctx.clearRect(0, 0, canvas.width, canvas.height);
-+            dots.forEach((p) => {
-+              p.x += p.vx; p.y += p.vy;
-+              if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-+              if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-+              ctx.beginPath();
-+              ctx.fillStyle = 'rgba(68,199,255,.8)';
-+              ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-+              ctx.fill();
-+            });
-+            requestAnimationFrame(tick);
-+          };
-+          resize();
-+          addEventListener('resize', resize);
-+          tick();
-+          return () => removeEventListener('resize', resize);
-+        }, []);
-+        return <canvas id="particles" className="fixed inset-0 -z-10 opacity-70" />;
-+      }
-+
-+      function App() {
-+        const [slots, setSlots] = useState(6);
-+        const [loading, setLoading] = useState(true);
-+        const [metrics, setMetrics] = useState({ winRate: 64.2, roi: 124, trades: 438, rr: 2.3 });
-+
-+        useEffect(() => {
-+          const t = setTimeout(() => setLoading(false), 1200);
-+          const slotTick = setInterval(() => setSlots((n) => Math.max(2, Math.min(8, n + (Math.random() > 0.5 ? -1 : 1)))), 5000);
-+          const metricTick = setInterval(() => {
-+            setMetrics({
-+              winRate: +(61.8 + Math.random() * 4.8).toFixed(1),
-+              roi: Math.round(116 + Math.random() * 16),
-+              trades: Math.round(430 + Math.random() * 36),
-+              rr: +(1.9 + Math.random() * .6).toFixed(1)
-+            })
-+          }, 6000);
-+          return () => { clearTimeout(t); clearInterval(slotTick); clearInterval(metricTick); };
-+        }, []);
-+
-+        const trust = useMemo(() => [
-+          '+124% ROI (Last 90 Days) — Verified',
-+          'Tracked via Binance & Bybit APIs',
-+          'Updated Every 60 Seconds'
-+        ], []);
-+
-+        if (loading) {
-+          return (
-+            <div className="min-h-screen grid place-items-center text-center px-4 relative overflow-hidden">
-+              <ParticleBg />
-+              <div className="glass rounded-2xl p-8 max-w-xl w-full relative overflow-hidden">
-+                <div className="scan absolute inset-y-0 w-1/2" />
-+                <p className="text-tradai-neon tracking-[.2em] text-xs">AI SCANNING MARKETS</p>
-+                <h1 className="text-2xl md:text-3xl font-semibold mt-3">TRADAI booting live signal engine...</h1>
-+              </div>
-+            </div>
-+          );
-+        }
-+
-+        return (
-+          <div className="relative overflow-hidden">
-+            <ParticleBg />
-+            <div className="absolute inset-0 grid-bg -z-10" />
-+
-+            <nav className="sticky top-0 z-30 backdrop-blur-md bg-black/50 border-b border-cyan-300/20">
-+              <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-+                <div className="text-xl font-bold tracking-[.2em]">TRAD<span className="text-tradai-neon drop-shadow-[0_0_15px_rgba(36,255,210,.8)]">AI</span></div>
-+                <div className="flex items-center gap-2">
-+                  <span className="hidden md:flex items-center gap-2 glass rounded-full px-3 py-1 text-sm text-tradai-lime border border-tradai-lime/30">
-+                    <span className="w-2 h-2 rounded-full bg-tradai-lime pulse-live" /> 🟢 AI LIVE — Tracking Markets
-+                  </span>
-+                  <a href="#pricing" className="px-4 py-2 rounded-xl font-semibold bg-gradient-to-r from-tradai-lime to-tradai-neon text-black shadow-lime">Start Pro</a>
-+                </div>
-+              </div>
-+            </nav>
-+
-+            <header className="max-w-6xl mx-auto px-4 py-16 text-center">
-+              <span className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 text-sm text-tradai-lime border border-tradai-lime/30">
-+                <span className="w-2 h-2 rounded-full bg-tradai-lime pulse-live" /> 🟢 AI LIVE — Tracking Markets
-+              </span>
-+              <div className="relative w-56 h-56 mx-auto mt-8 mb-8">
-+                <div className="absolute inset-0 rounded-full border border-cyan-200/30 ring" />
-+                <div className="absolute -inset-4 rounded-full border border-lime-200/25 ring r2" />
-+                <div className="absolute inset-4 rounded-full orb shadow-neon" />
-+              </div>
-+              <h1 className="text-4xl md:text-6xl font-bold leading-tight">AI-Powered Crypto Signals That Actually Perform</h1>
-+              <p className="max-w-3xl mx-auto mt-5 text-lg text-slate-300">60%+ Win Rate. Real-Time Entries, Stop Loss &amp; Take Profit. Fully Transparent. No Guesswork.</p>
-+              <div className="mt-8 flex flex-wrap justify-center gap-3">
-+                <a href="#signals" className="px-5 py-3 rounded-xl font-semibold bg-gradient-to-r from-tradai-lime to-tradai-neon text-black shadow-lime">🚀 View Live Signals</a>
-+                <a href="#performance" className="px-5 py-3 rounded-xl font-semibold glass border border-cyan-300/30 text-cyan-100">📊 See Performance</a>
-+              </div>
-+              <div className="grid md:grid-cols-3 gap-3 mt-8">
-+                {trust.map((t) => <div key={t} className="glass rounded-2xl p-3 text-sm">{t}</div>)}
-+              </div>
-+            </header>
-+
-+            <main className="max-w-6xl mx-auto px-4 pb-16 space-y-12">
-+              <section id="performance" className="space-y-4">
-+                <h2 className="text-2xl font-semibold">Performance Dashboard</h2>
-+                <p className="text-slate-300">Fully Transparent Performance — No Hidden Trades</p>
-+                <div className="glass rounded-2xl p-4 h-72">
-+                  <ResponsiveContainer width="100%" height="100%">
-+                    <AreaChart data={performanceData}>
-+                      <defs>
-+                        <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
-+                          <stop offset="5%" stopColor="#24ffd2" stopOpacity={.45}/>
-+                          <stop offset="95%" stopColor="#24ffd2" stopOpacity={0}/>
-+                        </linearGradient>
-+                      </defs>
-+                      <CartesianGrid stroke="rgba(148,163,184,.18)" strokeDasharray="3 3" />
-+                      <XAxis dataKey="d" stroke="#9db6b4" />
-+                      <YAxis stroke="#9db6b4" />
-+                      <Tooltip contentStyle={{ background: '#041119', border: '1px solid rgba(68,199,255,.3)' }} />
-+                      <Area type="monotone" dataKey="equity" stroke="#44c7ff" fill="url(#fill)" strokeWidth={3} />
-+                    </AreaChart>
-+                  </ResponsiveContainer>
-+                </div>
-+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-+                  <Metric label="Win Rate %" value={`${metrics.winRate}%`} />
-+                  <Metric label="Total ROI %" value={`+${metrics.roi}%`} />
-+                  <Metric label="Total Trades" value={`${metrics.trades}`} />
-+                  <Metric label="Risk / Reward" value={`1 : ${metrics.rr}`} />
-+                </div>
-+              </section>
-+
-+              <section id="signals" className="space-y-4">
-+                <div className="flex flex-wrap justify-between items-center gap-2">
-+                  <h2 className="text-2xl font-semibold">⚡ Live Signals</h2>
-+                  <div className="glass rounded-full px-4 py-2 text-sm text-tradai-lime border border-tradai-lime/30">
-+                    Only {slots} signals left today
-+                  </div>
-+                </div>
-+                <div className="grid md:grid-cols-2 gap-4">
-+                  {liveSignals.map((s) => <SignalCard key={s.pair + s.direction} signal={s} />)}
-+                </div>
-+              </section>
-+
-+              <section>
-+                <h2 className="text-2xl font-semibold mb-4">🔔 Features</h2>
-+                <div className="grid md:grid-cols-3 gap-3">
-+                  {['🤖 AI Multi-Indicator Engine','📡 Real-Time Market Tracking','🔔 Telegram Alerts Integration','⚙️ Auto-Trade (Optional)','📊 Risk Management Built-In','🌐 Social Sentiment Analysis'].map((x) => (
-+                    <div key={x} className="glass rounded-2xl p-4 font-medium">{x}</div>
-+                  ))}
-+                </div>
-+              </section>
-+
-+              <section id="pricing" className="space-y-4">
-+                <h2 className="text-2xl font-semibold">💰 Pricing</h2>
-+                <p className="text-slate-300">10,000+ traders using TRADAI</p>
-+                <div className="grid md:grid-cols-2 gap-4">
-+                  <PricingCard title="FREE PLAN" price="$0" items={['Limited signals','Delayed updates']} cta="Get Started" />
-+                  <PricingCard title="PRO PLAN" price="$19/month" items={['All signals unlocked','Real-time alerts','AI explanations','Priority updates']} cta="Upgrade to Pro" pro />
-+                </div>
-+              </section>
-+
-+              <section className="space-y-4">
-+                <h2 className="text-2xl font-semibold">📉 Transparency</h2>
-+                <p className="text-slate-300">We don’t hide losses. Transparency builds trust.</p>
-+                <div className="glass rounded-2xl overflow-x-auto">
-+                  <table className="min-w-full text-sm">
-+                    <thead className="bg-cyan-400/5">
-+                      <tr>{['Pair','Direction','Entry','SL','TP','Result','Profit %'].map((h) => <th key={h} className="text-left px-4 py-3">{h}</th>)}</tr>
-+                    </thead>
-+                    <tbody>
-+                      {historyRows.map((r, i) => (
-+                        <tr key={i} className="border-t border-cyan-200/10">
-+                          <td className="px-4 py-3">{r[0]}</td>
-+                          <td className={`px-4 py-3 ${r[1] === 'LONG' ? 'text-tradai-lime' : 'text-tradai-danger'}`}>{r[1]}</td>
-+                          <td className="px-4 py-3">{r[2]}</td><td className="px-4 py-3">{r[3]}</td><td className="px-4 py-3">{r[4]}</td><td className="px-4 py-3">{r[5]}</td>
-+                          <td className={`px-4 py-3 ${r[6].startsWith('+') ? 'text-tradai-lime' : 'text-tradai-danger'}`}>{r[6]}</td>
-+                        </tr>
-+                      ))}
-+                    </tbody>
-+                  </table>
-+                </div>
-+              </section>
-+
-+              <section className="glass rounded-2xl p-5 flex flex-wrap gap-3 items-center justify-between">
-+                <div>
-+                  <h3 className="text-xl font-semibold">Ready to trade with verified AI signals?</h3>
-+                  <p className="text-slate-300">Live entries, transparent outcomes, and risk controls built in.</p>
-+                </div>
-+                <a href="#pricing" className="px-5 py-3 rounded-xl font-semibold bg-gradient-to-r from-tradai-lime to-tradai-neon text-black shadow-lime">🚀 Unlock TRADAI Pro</a>
-+              </section>
-+            </main>
-+
-+            <footer className="border-t border-cyan-200/20 py-6 text-slate-400 text-sm text-center">
-+              TRADAI · Educational content only. Trading carries risk.
-+            </footer>
-+          </div>
-+        );
-+      }
-+
-+      function Metric({ label, value }) {
-+        return (
-+          <div className="glass rounded-2xl p-4">
-+            <div className="text-slate-400 text-sm">{label}</div>
-+            <div className="text-2xl font-semibold mt-1">{value}</div>
-+          </div>
-+        );
-+      }
-+
-+      function PricingCard({ title, price, items, cta, pro = false }) {
-+        return (
-+          <div className={`glass rounded-2xl p-5 relative ${pro ? 'border-lime-300/40 shadow-lime' : ''}`}>
-+            {pro && <span className="absolute top-3 right-3 text-xs px-2 py-1 rounded-full bg-tradai-lime text-black font-semibold">Most Popular</span>}
-+            <h3 className="text-lg font-semibold">{title}</h3>
-+            <p className="text-3xl font-bold mt-2">{price}</p>
-+            <ul className="mt-3 space-y-2 text-slate-300 text-sm">{items.map((i) => <li key={i}>• {i}</li>)}</ul>
-+            <button className={`mt-5 px-4 py-2 rounded-xl font-semibold ${pro ? 'bg-gradient-to-r from-tradai-lime to-tradai-neon text-black' : 'glass border border-cyan-300/30 text-cyan-100'}`}>{cta}</button>
-+          </div>
-+        );
-+      }
-+
-+      function SignalCard({ signal }) {
-+        const isLong = signal.direction === 'LONG';
-+        return (
-+          <article className="glass rounded-2xl p-4 card-lift">
-+            <div className="flex justify-between items-start gap-2">
-+              <div className="text-lg font-semibold">{signal.pair}</div>
-+              <span className={`text-xs font-bold px-2 py-1 rounded-lg ${isLong ? 'text-tradai-lime bg-lime-300/10 border border-lime-300/30' : 'text-tradai-danger bg-rose-300/10 border border-rose-300/30'}`}>{signal.direction}</span>
-+            </div>
-+            <div className="text-xs text-tradai-neon mt-2 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-tradai-neon pulse-live" /> LIVE · Just Triggered</div>
-+            <div className="grid grid-cols-3 gap-2 mt-3 text-sm">
-+              <Field title="Entry" value={signal.entry} />
-+              <Field title="Stop Loss" value={signal.sl} />
-+              <Field title="Take Profit" value={signal.tp} />
-+              <Field title="Confidence" value={`${signal.confidence}%`} />
-+              <Field title="Timer" value={`Expires in ${signal.expires}`} />
-+              <Field title="Status" value="Monitoring" />
-+            </div>
-+            <details className="mt-3 border-t border-cyan-200/20 pt-3 text-sm">
-+              <summary className="cursor-pointer text-cyan-100">Why this trade?</summary>
-+              <p className="text-slate-300 mt-2">{signal.why}</p>
-+            </details>
-+          </article>
-+        );
-+      }
-+
-+      function Field({ title, value }) {
-+        return <div><div className="text-xs text-slate-400">{title}</div><div>{value}</div></div>;
-+      }
-+
-+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-+    </script>
-+  </body>
- </html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EdgeX — AI Crypto Signals</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+/* ── TOKENS ── */
+:root {
+  --green:  #00ff9f;
+  --cyan:   #00d4ff;
+  --purple: #7b2fff;
+  --red:    #ff3b5c;
+  --bg:     #020408;
+  --border: rgba(0,255,159,0.12);
+  --muted:  #3a5060;
+  --text:   #d8f0ff;
+  --fh: 'Orbitron', sans-serif;
+  --fb: 'Rajdhani', sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--fb);
+  font-size: 16px;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── CURSOR ── */
+#cursor { position:fixed;top:0;left:0;z-index:9999;pointer-events:none;mix-blend-mode:screen; }
+.c-dot {
+  position:absolute;width:8px;height:8px;
+  background:var(--green);border-radius:50%;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 14px var(--green),0 0 32px var(--green);
+}
+.c-ring {
+  position:absolute;width:38px;height:38px;
+  border:1px solid rgba(0,255,159,0.5);border-radius:50%;
+  transform:translate(-50%,-50%);
+  transition:width .15s,height .15s,border-color .15s;
+}
+.c-ring.big { width:56px;height:56px;border-color:var(--cyan);background:rgba(0,212,255,0.04); }
+
+/* ── CANVAS ── */
+#bg-canvas {
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  width:100%;height:100%;
+}
+
+/* ── OVERLAYS ── */
+body::before {
+  content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,0.75) 100%);
+}
+body::after {
+  content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:repeating-linear-gradient(
+    0deg,transparent,transparent 2px,
+    rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px
+  );
+  animation:scanlines 10s linear infinite;
+}
+@keyframes scanlines{from{background-position:0 0}to{background-position:0 80px}}
+
+/* ── NAV ── */
+nav {
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:62px;
+  background:rgba(2,4,8,0.75);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.nav-inner {
+  max-width:1200px;margin:0 auto;padding:0 28px;
+  height:100%;display:flex;align-items:center;justify-content:space-between;
+}
+.logo {
+  font-family:var(--fh);font-size:1.15rem;font-weight:900;
+  letter-spacing:.18em;color:var(--green);
+  text-shadow:0 0 22px rgba(0,255,159,.6);
+  text-decoration:none;display:flex;align-items:center;gap:10px;
+}
+.logo-box {
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;color:#000;font-weight:900;
+  box-shadow:0 0 20px rgba(0,255,159,.45);
+  animation:logoPulse 3s ease infinite;
+}
+@keyframes logoPulse{
+  0%,100%{box-shadow:0 0 20px rgba(0,255,159,.4)}
+  50%{box-shadow:0 0 44px rgba(0,255,159,.8),0 0 70px rgba(0,212,255,.35)}
+}
+.nav-r{display:flex;align-items:center;gap:20px;}
+.live-pill {
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--fh);font-size:.62rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--green);
+  background:rgba(0,255,159,.07);
+  border:1px solid rgba(0,255,159,.22);
+  border-radius:99px;padding:6px 14px;
+}
+.live-dot {
+  width:7px;height:7px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 10px var(--green);
+  animation:liveDot 1.4s ease infinite;
+}
+@keyframes liveDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.65)}}
+.nav-slots {
+  font-family:var(--fh);font-size:.65rem;letter-spacing:.1em;
+  color:var(--red);border:1px solid rgba(255,59,92,.25);
+  background:rgba(255,59,92,.07);border-radius:8px;padding:5px 12px;
+}
+.btn-cta {
+  font-family:var(--fh);font-size:.65rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:#000;cursor:none;text-decoration:none;
+  background:linear-gradient(90deg,var(--green),var(--cyan));
+  border:none;border-radius:8px;padding:10px 20px;
+  box-shadow:0 0 20px rgba(0,255,159,.35);
+  transition:transform .2s,box-shadow .2s;
+  position:relative;overflow:hidden;display:inline-block;
+}
+.btn-cta::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);
+  transform:translateX(-100%);transition:transform .5s;
+}
+.btn-cta:hover::before{transform:translateX(100%)}
+.btn-cta:hover{transform:translateY(-2px);box-shadow:0 0 44px rgba(0,255,159,.55)}
+
+/* ── MAIN ── */
+main{position:relative;z-index:2;}
+.page{max-width:1200px;margin:0 auto;padding:0 28px;}
+
+/* ── HERO ── */
+.hero {
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:100px 28px 60px;
+}
+.hero-badge {
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--fh);font-size:.6rem;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:var(--cyan);
+  background:rgba(0,212,255,.07);
+  border:1px solid rgba(0,212,255,.25);
+  border-radius:99px;padding:8px 18px;margin-bottom:36px;
+  opacity:0;
+}
+
+/* ── ORB ── */
+.orb-wrap{
+  position:relative;width:260px;height:260px;
+  margin:0 auto 44px;opacity:0;
+}
+.orb-glow{
+  position:absolute;inset:-40px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,255,159,.07),rgba(0,212,255,.04) 45%,transparent 70%);
+  animation:orbBob 6s ease-in-out infinite;
+}
+.orb-r3{position:absolute;inset:-22px;border-radius:50%;border:1px solid rgba(123,47,255,.12);animation:orbSpin 18s linear infinite;}
+.orb-r1{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(0,255,159,.22);animation:orbSpin 8s linear infinite;}
+.orb-r1::before{content:'';position:absolute;top:-4px;left:50%;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 14px var(--green);transform:translateX(-50%);}
+.orb-r2{position:absolute;inset:22px;border-radius:50%;border:1px solid rgba(0,212,255,.16);animation:orbSpin 12s linear infinite reverse;}
+.orb-r2::before{content:'';position:absolute;top:-4px;left:50%;width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);transform:translateX(-50%);}
+.orb-core{
+  position:absolute;inset:42px;border-radius:50%;
+  background:radial-gradient(circle at 32% 32%,rgba(0,255,159,.65),rgba(0,212,255,.35) 38%,rgba(123,47,255,.2) 68%,transparent);
+  box-shadow:0 0 44px rgba(0,255,159,.3),0 0 90px rgba(0,212,255,.18),0 0 130px rgba(123,47,255,.12),inset 0 0 44px rgba(0,255,159,.1);
+  animation:orbBob 6s ease-in-out infinite,orbHue 22s linear infinite;
+}
+@keyframes orbSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes orbBob{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-16px) scale(1.02)}}
+@keyframes orbHue{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}
+
+.hero h1{
+  font-family:var(--fh);
+  font-size:clamp(2rem,5vw,4rem);font-weight:900;
+  line-height:1.05;letter-spacing:-.02em;margin-bottom:20px;opacity:0;
+}
+.hero h1 em{font-style:normal;
+  background:linear-gradient(90deg,var(--green),var(--cyan));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 28px rgba(0,255,159,.35));
+}
+.hero-sub{
+  font-size:1.05rem;font-weight:400;color:var(--muted);
+  line-height:1.75;max-width:500px;margin:0 auto 44px;opacity:0;
+}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:60px;opacity:0;}
+.btn-ghost{
+  font-family:var(--fh);font-size:.65rem;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--cyan);cursor:none;text-decoration:none;
+  background:rgba(0,212,255,.05);
+  border:1px solid rgba(0,212,255,.3);
+  border-radius:8px;padding:12px 24px;
+  transition:all .2s;display:inline-block;
+}
+.btn-ghost:hover{background:rgba(0,212,255,.1);box-shadow:0 0 22px rgba(0,212,255,.22);transform:translateY(-2px);}
+
+/* ── TRUST STRIP ── */
+.trust-strip{
+  display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  margin-bottom:56px;opacity:0;
+}
+.trust-item{
+  font-family:var(--fh);font-size:.6rem;font-weight:600;
+  letter-spacing:.1em;padding:8px 16px;
+  background:rgba(0,255,159,.04);
+  border:1px solid rgba(0,255,159,.12);
+  border-radius:8px;color:var(--muted);
+}
+
+/* ── METRICS ── */
+.metrics-row{
+  display:flex;gap:1px;background:var(--border);
+  border:1px solid var(--border);border-radius:16px;overflow:hidden;
+  width:100%;max-width:900px;opacity:0;
+}
+.metric{
+  flex:1;background:rgba(0,255,159,.02);
+  backdrop-filter:blur(20px);padding:24px 20px;text-align:center;
+  transition:background .3s;
+}
+.metric:hover{background:rgba(0,255,159,.05);}
+.metric-v{
+  font-family:var(--fh);font-size:1.8rem;font-weight:900;
+  letter-spacing:-.02em;margin-bottom:6px;
+}
+.metric-v.g{color:var(--green);text-shadow:0 0 22px rgba(0,255,159,.4);}
+.metric-v.c{color:var(--cyan);text-shadow:0 0 22px rgba(0,212,255,.4);}
+.metric-v.r{color:var(--red);}
+.metric-l{font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+
+/* ── TICKER ── */
+.ticker{
+  overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:rgba(0,0,0,.45);padding:11px 0;position:relative;z-index:2;
+}
+.ticker::before,.ticker::after{
+  content:'';position:absolute;top:0;width:140px;height:100%;z-index:2;pointer-events:none;
+}
+.ticker::before{left:0;background:linear-gradient(90deg,var(--bg),transparent);}
+.ticker::after{right:0;background:linear-gradient(-90deg,var(--bg),transparent);}
+.ticker-t{
+  display:flex;gap:48px;
+  animation:tickScroll 28s linear infinite;
+  white-space:nowrap;width:max-content;
+}
+@keyframes tickScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tick-item{display:flex;align-items:center;gap:10px;font-family:var(--fh);font-size:.7rem;font-weight:700;letter-spacing:.08em;}
+.tl{color:var(--green)}.ts{color:var(--red)}.tm{color:var(--muted)}
+
+/* ── SECTION ── */
+.section{padding:72px 0;}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+.sec-title{
+  font-family:var(--fh);font-size:.82rem;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--green);
+  display:flex;align-items:center;gap:12px;
+}
+.sec-title::before{content:'';width:3px;height:18px;background:linear-gradient(to bottom,var(--green),transparent);border-radius:2px;}
+.cnt-badge{
+  font-family:var(--fb);font-size:.72rem;font-weight:600;
+  background:rgba(0,255,159,.1);border:1px solid rgba(0,255,159,.25);
+  color:var(--green);border-radius:99px;padding:3px 12px;
+}
+
+/* ── SIGNAL CARDS ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;}
+.sig-card{
+  background:rgba(0,255,159,.02);
+  border:1px solid var(--border);border-radius:14px;
+  padding:22px;position:relative;overflow:hidden;
+  transition:all .3s cubic-bezier(.23,1,.32,1);cursor:none;
+}
+.sig-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;}
+.sig-card.long::before{background:linear-gradient(90deg,var(--green),transparent);}
+.sig-card.short::before{background:linear-gradient(90deg,var(--red),transparent);}
+.sig-card::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(0,255,159,.06),transparent 60%);
+  opacity:0;transition:opacity .3s;
+}
+.sig-card:hover::after{opacity:1;}
+.sig-card:hover{
+  border-color:rgba(0,255,159,.3);
+  box-shadow:0 0 44px rgba(0,255,159,.08),0 20px 60px rgba(0,0,0,.5);
+  transform:perspective(800px) rotateX(1.5deg) rotateY(.8deg) translateY(-6px);
+}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
+.card-sym{font-family:var(--fh);font-size:1.1rem;font-weight:900;letter-spacing:.05em;}
+.dir-tag{
+  font-family:var(--fh);font-size:.6rem;font-weight:700;
+  letter-spacing:.14em;padding:5px 11px;border-radius:6px;
+}
+.dir-tag.long{background:rgba(0,255,159,.1);border:1px solid rgba(0,255,159,.3);color:var(--green);box-shadow:0 0 12px rgba(0,255,159,.1);}
+.dir-tag.short{background:rgba(255,59,92,.1);border:1px solid rgba(255,59,92,.3);color:var(--red);box-shadow:0 0 12px rgba(255,59,92,.1);}
+
+.price-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px;}
+.pf label{display:block;font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.pf .v{font-family:var(--fh);font-size:.85rem;font-weight:700;}
+.pf .v.en{color:var(--cyan)}.pf .v.sl{color:var(--red)}.pf .v.tp{color:var(--green)}
+
+.card-why{
+  font-size:.8rem;color:var(--muted);line-height:1.6;
+  padding:10px 12px;background:rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.05);border-radius:8px;
+  margin-bottom:16px;
+}
+.card-foot{display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid rgba(0,255,159,.07);}
+.conf-wrap{flex:1;margin-right:14px;}
+.conf-lbl{font-size:.62rem;font-weight:600;letter-spacing:.08em;color:var(--muted);margin-bottom:5px;}
+.conf-track{height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
+.conf-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--green),var(--cyan));box-shadow:0 0 8px rgba(0,255,159,.4);transition:width 1.5s cubic-bezier(.23,1,.32,1);}
+.tf-tag{font-family:var(--fh);font-size:.58rem;font-weight:700;letter-spacing:.14em;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:4px 9px;}
+
+/* ── CHART ── */
+.chart-card{
+  background:rgba(0,255,159,.015);
+  border:1px solid var(--border);border-radius:16px;padding:28px;
+}
+.chart-card h3{font-family:var(--fh);font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--green);margin-bottom:20px;}
+
+/* ── FEATURES ── */
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.feat-card{
+  background:rgba(0,212,255,.02);
+  border:1px solid rgba(0,212,255,.1);border-radius:12px;
+  padding:20px;font-size:.88rem;font-weight:500;
+  transition:all .25s;cursor:none;
+}
+.feat-card:hover{border-color:rgba(0,212,255,.3);background:rgba(0,212,255,.05);transform:translateY(-4px);box-shadow:0 0 28px rgba(0,212,255,.08);}
+.feat-icon{font-size:1.4rem;margin-bottom:10px;}
+
+/* ── PRICING ── */
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.price-card{
+  background:rgba(0,255,159,.02);
+  border:1px solid var(--border);border-radius:16px;padding:28px;
+  position:relative;overflow:hidden;transition:all .3s;
+}
+.price-card.pro{border-color:rgba(0,255,159,.25);box-shadow:0 0 40px rgba(0,255,159,.06);}
+.price-card.pro::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.price-badge{
+  position:absolute;top:18px;right:18px;
+  font-family:var(--fh);font-size:.6rem;font-weight:700;letter-spacing:.1em;
+  background:linear-gradient(90deg,var(--green),var(--cyan));color:#000;
+  border-radius:99px;padding:4px 12px;
+}
+.price-name{font-family:var(--fh);font-size:.78rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.price-amt{font-family:var(--fh);font-size:2.4rem;font-weight:900;letter-spacing:-.02em;margin-bottom:20px;}
+.price-amt.free{color:var(--muted);}
+.price-amt.pro{color:var(--green);text-shadow:0 0 24px rgba(0,255,159,.4);}
+.price-items{list-style:none;margin-bottom:24px;}
+.price-items li{font-size:.88rem;color:var(--muted);padding:5px 0;display:flex;align-items:center;gap:8px;}
+.price-items li::before{content:'›';color:var(--green);font-size:1rem;}
+.price-items li.on{color:var(--text);}
+
+/* ── TABLE ── */
+.table-wrap{background:rgba(0,255,159,.01);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:rgba(0,255,159,.03);}
+th{text-align:left;padding:15px 18px;font-family:var(--fh);font-size:.58rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+td{padding:14px 18px;font-size:.88rem;font-weight:500;border-bottom:1px solid rgba(0,255,159,.04);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tbody tr{transition:background .15s;}
+tbody tr:hover td{background:rgba(0,255,159,.02);}
+.pill{display:inline-flex;align-items:center;font-family:var(--fh);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:6px;}
+.pill.long{background:rgba(0,255,159,.1);color:var(--green);border:1px solid rgba(0,255,159,.2);}
+.pill.short{background:rgba(255,59,92,.1);color:var(--red);border:1px solid rgba(255,59,92,.2);}
+.pill.tp{background:rgba(0,255,159,.1);color:var(--green);border:1px solid rgba(0,255,159,.2);}
+.pill.sl{background:rgba(255,59,92,.1);color:var(--red);border:1px solid rgba(255,59,92,.2);}
+.ppos{color:var(--green);font-weight:700;text-shadow:0 0 12px rgba(0,255,159,.3);}
+.pneg{color:var(--red);font-weight:700;}
+
+/* ── CTA BANNER ── */
+.cta-banner{
+  background:rgba(0,255,159,.02);border:1px solid rgba(0,255,159,.15);
+  border-radius:16px;padding:36px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;
+  position:relative;overflow:hidden;
+}
+.cta-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.cta-banner h3{font-family:var(--fh);font-size:1rem;font-weight:700;letter-spacing:.04em;margin-bottom:8px;}
+.cta-banner p{color:var(--muted);font-size:.9rem;}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:72px 24px;color:var(--muted);}
+.empty-i{font-size:2.4rem;margin-bottom:14px;animation:emptyBob 3s ease-in-out infinite;}
+@keyframes emptyBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.empty-t{font-size:.88rem;font-weight:500;}
+
+/* ── SHIMMER ── */
+.shimmer{
+  background:linear-gradient(90deg,rgba(0,255,159,.03) 25%,rgba(0,255,159,.08) 50%,rgba(0,255,159,.03) 75%);
+  background-size:200% 100%;animation:shimmer 2s infinite;border-radius:10px;height:190px;
+}
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+
+/* ── LOADING SCREEN ── */
+.boot-screen{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;transition:opacity .6s,visibility .6s;
+}
+.boot-screen.hidden{opacity:0;visibility:hidden;}
+.boot-logo{font-family:var(--fh);font-size:2rem;font-weight:900;letter-spacing:.2em;color:var(--green);text-shadow:0 0 30px rgba(0,255,159,.5);}
+.boot-bar{width:280px;height:2px;background:rgba(0,255,159,.1);border-radius:2px;overflow:hidden;}
+.boot-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:2px;width:0%;transition:width .05s;}
+.boot-txt{font-family:var(--fh);font-size:.6rem;letter-spacing:.2em;color:var(--muted);}
+.scan-line{
+  position:absolute;height:2px;left:0;right:0;
+  background:linear-gradient(90deg,transparent,rgba(0,255,159,.4),transparent);
+  animation:scanLine 2s linear infinite;
+}
+@keyframes scanLine{from{top:0}to{top:100%}}
+
+/* ── FOOTER ── */
+footer{position:relative;z-index:2;border-top:1px solid var(--border);padding:36px 28px;text-align:center;}
+.foot-logo{font-family:var(--fh);font-size:.95rem;font-weight:900;letter-spacing:.18em;color:var(--green);text-shadow:0 0 20px rgba(0,255,159,.3);margin-bottom:14px;}
+.foot-txt{font-size:.75rem;color:var(--muted);line-height:1.75;}
+
+/* ── SCROLL FADE ── */
+.fade-up{opacity:0;transform:translateY(28px);transition:all .8s cubic-bezier(.23,1,.32,1);}
+.fade-up.in{opacity:1;transform:none;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .pricing-grid{grid-template-columns:1fr;}
+  .cards-grid{grid-template-columns:1fr;}
+  .metrics-row{flex-direction:column;}
+  .hide-m{display:none;}
+  .nav-slots{display:none;}
+  .section{padding:48px 0;}
+  .orb-wrap{width:200px;height:200px;}
+}
+</style>
+</head>
+<body>
+
+<!-- BOOT SCREEN -->
+<div class="boot-screen" id="boot">
+  <div class="scan-line"></div>
+  <div class="boot-logo">EDGE<span style="color:var(--cyan)">X</span></div>
+  <div class="boot-bar"><div class="boot-fill" id="boot-fill"></div></div>
+  <div class="boot-txt" id="boot-txt">INITIALIZING AI ENGINE…</div>
+</div>
+
+<!-- CURSOR -->
+<div id="cursor">
+  <div class="c-ring" id="cring"></div>
+  <div class="c-dot"  id="cdot"></div>
+</div>
+
+<!-- THREE.JS CANVAS -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo"><div class="logo-box">⚡</div>EDGE<span style="color:var(--cyan)">X</span></a>
+    <div class="nav-r">
+      <div class="live-pill"><span class="live-dot"></span>AI • LIVE</div>
+      <div class="nav-slots" id="nav-slots">— SLOTS LEFT</div>
+      <a href="#pricing" class="btn-cta">Get Pro</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<!-- HERO -->
+<section class="hero page">
+  <div class="hero-badge" id="h-badge"><span class="live-dot"></span>AI-Powered &nbsp;•&nbsp; Multi-Indicator &nbsp;•&nbsp; Real-Time</div>
+  <div class="orb-wrap" id="h-orb">
+    <div class="orb-glow"></div>
+    <div class="orb-r3"></div>
+    <div class="orb-r1"></div>
+    <div class="orb-r2"></div>
+    <div class="orb-core"></div>
+  </div>
+  <h1 id="h-h1">Real Signals.<br/><em>Real Results.</em></h1>
+  <p class="hero-sub" id="h-sub">AI-powered crypto signals with full transparency — entry, exit &amp; stop-loss powered by 5–6 indicator confluence and live social sentiment analysis.</p>
+  <div class="hero-btns" id="h-btns">
+    <a href="#signals" class="btn-cta">⚡ View Live Signals</a>
+    <a href="#performance" class="btn-ghost">📊 Performance →</a>
+  </div>
+  <div class="trust-strip" id="h-trust">
+    <div class="trust-item">✓ +124% ROI — Last 90 Days</div>
+    <div class="trust-item">✓ Tracked via Binance API</div>
+    <div class="trust-item">✓ Updated Every 60 Seconds</div>
+    <div class="trust-item">✓ No Hidden Trades</div>
+  </div>
+  <div class="metrics-row" id="h-metrics">
+    <div class="metric"><div class="metric-v c" id="m-active">—</div><div class="metric-l">Active Signals</div></div>
+    <div class="metric"><div class="metric-v g" id="m-wr">—</div><div class="metric-l">Win Rate</div></div>
+    <div class="metric"><div class="metric-v g" id="m-pnl">—</div><div class="metric-l">Total P&amp;L</div></div>
+    <div class="metric"><div class="metric-v" id="m-tot" style="color:var(--text)">—</div><div class="metric-l">All Trades</div></div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-t" id="ticker"></div>
+</div>
+
+<!-- PERFORMANCE -->
+<section class="section page fade-up" id="performance">
+  <div class="sec-head">
+    <div class="sec-title">Performance Analytics</div>
+  </div>
+  <div class="chart-card">
+    <h3>📈 Equity Curve — Last 10 Weeks</h3>
+    <div id="chart-root" style="height:280px"></div>
+  </div>
+</section>
+
+<!-- ACTIVE SIGNALS -->
+<section class="section page fade-up" id="signals">
+  <div class="sec-head">
+    <div class="sec-title">⚡ Live Signals <span class="cnt-badge" id="act-badge">0</span></div>
+    <button onclick="loadData()" style="background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--fh);font-size:.62rem;letter-spacing:.1em;padding:8px 14px;border-radius:8px;cursor:none;transition:all .2s"
+      onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)'"
+      onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">↻ REFRESH</button>
+  </div>
+  <div class="cards-grid" id="act-grid">
+    <div class="shimmer"></div><div class="shimmer" style="opacity:.5"></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section page fade-up">
+  <div class="sec-head"><div class="sec-title">🔧 Features</div></div>
+  <div class="feat-grid" id="feat-grid">
+    <div class="feat-card"><div class="feat-icon">🤖</div>AI Multi-Indicator Engine</div>
+    <div class="feat-card"><div class="feat-icon">📡</div>Real-Time Market Tracking</div>
+    <div class="feat-card"><div class="feat-icon">🔔</div>Telegram Alerts</div>
+    <div class="feat-card"><div class="feat-icon">🌐</div>Social Sentiment Analysis</div>
+    <div class="feat-card"><div class="feat-icon">📊</div>Risk Management Built-In</div>
+    <div class="feat-card"><div class="feat-icon">⚙️</div>Auto-Trade (Optional)</div>
+  </div>
+</section>
+
+<!-- HISTORY -->
+<section class="section page fade-up" id="history">
+  <div class="sec-head">
+    <div class="sec-title">📉 Signal History <span class="cnt-badge" id="hist-badge">0</span></div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Symbol</th><th>Dir</th><th>Entry</th>
+        <th class="hide-m">SL</th><th class="hide-m">TP</th>
+        <th>P&amp;L</th><th>Result</th>
+        <th class="hide-m">TF</th><th class="hide-m">Date</th>
+      </tr></thead>
+      <tbody id="hist-body">
+        <tr><td colspan="9"><div class="empty"><div class="empty-i">⏳</div><div class="empty-t">Loading…</div></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section page fade-up" id="pricing">
+  <div class="sec-head"><div class="sec-title">💰 Pricing</div></div>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-name">Free Plan</div>
+      <div class="price-amt free">$0</div>
+      <ul class="price-items">
+        <li>Limited signals (2/day)</li>
+        <li>Delayed 15 min</li>
+        <li>No SL/TP levels</li>
+      </ul>
+      <a href="#" class="btn-ghost" style="display:inline-block;font-size:.65rem">Get Started →</a>
+    </div>
+    <div class="price-card pro">
+      <div class="price-badge">MOST POPULAR</div>
+      <div class="price-name">Pro Plan</div>
+      <div class="price-amt pro">$19<span style="font-size:1rem;color:var(--muted)">/mo</span></div>
+      <ul class="price-items">
+        <li class="on">All signals unlocked</li>
+        <li class="on">Real-time alerts</li>
+        <li class="on">Full SL / TP levels</li>
+        <li class="on">AI signal explanation</li>
+        <li class="on">Telegram integration</li>
+      </ul>
+      <a href="#" class="btn-cta" style="display:inline-block">🚀 Upgrade to Pro</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section page fade-up">
+  <div class="cta-banner">
+    <div>
+      <h3>Ready to trade with verified AI signals?</h3>
+      <p>Live entries, transparent outcomes, and risk controls built in.</p>
+    </div>
+    <a href="#pricing" class="btn-cta">🚀 Unlock EdgeX Pro</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="foot-logo">EDGE<span style="color:var(--cyan)">X</span></div>
+  <div class="foot-txt">⚠ Cryptocurrency trading involves substantial risk.<br/>Past performance does not guarantee future results. Trade responsibly. © 2025 EdgeX</div>
+</footer>
+
+<!-- RECHARTS MOUNT -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+<script type="text/babel">
+const { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
+
+const perfData = [
+  {d:'W1',eq:100},{d:'W2',eq:107},{d:'W3',eq:113},
+  {d:'W4',eq:110},{d:'W5',eq:121},{d:'W6',eq:129},
+  {d:'W7',eq:138},{d:'W8',eq:146},{d:'W9',eq:151},{d:'W10',eq:160}
+];
+
+function Chart() {
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <AreaChart data={perfData} margin={{top:10,right:10,left:-10,bottom:0}}>
+        <defs>
+          <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%"  stopColor="#00ff9f" stopOpacity={0.35}/>
+            <stop offset="95%" stopColor="#00ff9f" stopOpacity={0}/>
+          </linearGradient>
+        </defs>
+        <CartesianGrid stroke="rgba(0,255,159,0.06)" strokeDasharray="3 3"/>
+        <XAxis dataKey="d" stroke="#3a5060" tick={{fontFamily:"'Orbitron',sans-serif",fontSize:10}}/>
+        <YAxis stroke="#3a5060" tick={{fontFamily:"'Orbitron',sans-serif",fontSize:10}}/>
+        <Tooltip contentStyle={{background:'#041014',border:'1px solid rgba(0,255,159,.25)',fontFamily:"'Orbitron',sans-serif",fontSize:11,borderRadius:8}}/>
+        <Area type="monotone" dataKey="eq" stroke="#00d4ff" fill="url(#cg)" strokeWidth={2.5}/>
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('chart-root')).render(<Chart/>);
+</script>
+
+<script>
+// ═══════════════════════════════════
+// BOOT SEQUENCE
+// ═══════════════════════════════════
+(function(){
+  const fill = document.getElementById('boot-fill');
+  const txt  = document.getElementById('boot-txt');
+  const msgs = ['LOADING AI ENGINE…','CONNECTING MARKET DATA…','SCANNING INDICATORS…','ANALYZING SENTIMENT…','SIGNAL ENGINE READY ✓'];
+  let pct = 0;
+  const tick = setInterval(() => {
+    pct += Math.random()*18 + 4;
+    if(pct > 100) pct = 100;
+    fill.style.width = pct + '%';
+    txt.textContent = msgs[Math.min(Math.floor(pct/21), msgs.length-1)];
+    if(pct >= 100){
+      clearInterval(tick);
+      setTimeout(() => document.getElementById('boot').classList.add('hidden'), 400);
+    }
+  }, 180);
+})();
+
+// ═══════════════════════════════════
+// THREE.JS BACKGROUND
+// ═══════════════════════════════════
+(function(){
+  const canvas = document.getElementById('bg-canvas');
+  const R = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+  R.setPixelRatio(Math.min(devicePixelRatio, 2));
+  R.setSize(innerWidth, innerHeight);
+  R.setClearColor(0x000000, 0);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
+  camera.position.set(0, 0, 80);
+
+  // PARTICLES
+  const N = window.innerWidth < 768 ? 600 : 1400;
+  const pos = new Float32Array(N*3), col = new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    pos[i*3]   = (Math.random()-.5)*320;
+    pos[i*3+1] = (Math.random()-.5)*220;
+    pos[i*3+2] = (Math.random()-.5)*160;
+    const t = Math.random();
+    if(t<.5){col[i*3]=0;col[i*3+1]=1;col[i*3+2]=.62;}
+    else if(t<.8){col[i*3]=0;col[i*3+1]=.83;col[i*3+2]=1;}
+    else{col[i*3]=.48;col[i*3+1]=.18;col[i*3+2]=1;}
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(col,3));
+  const mat = new THREE.PointsMaterial({size:.75,vertexColors:true,transparent:true,opacity:.55,sizeAttenuation:true,blending:THREE.AdditiveBlending,depthWrite:false});
+  scene.add(new THREE.Points(geo, mat));
+
+  // GRID
+  const gm = new THREE.LineBasicMaterial({color:0x00ff9f,transparent:true,opacity:.04,blending:THREE.AdditiveBlending});
+  const grid = new THREE.Group();
+  for(let i=-22;i<=22;i++){
+    grid.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-220,i*8,0),new THREE.Vector3(220,i*8,0)]),gm));
+    grid.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(i*10,-180,0),new THREE.Vector3(i*10,180,0)]),gm));
+  }
+  grid.position.z = -40;
+  scene.add(grid);
+
+  // DATA STREAMS
+  const sm = new THREE.LineBasicMaterial({color:0x00d4ff,transparent:true,opacity:.12,blending:THREE.AdditiveBlending});
+  const streams = new THREE.Group();
+  for(let i=0;i<10;i++){
+    const pts=[], sx=(Math.random()-.5)*280;
+    for(let j=0;j<22;j++) pts.push(new THREE.Vector3(sx+(Math.random()-.5)*18,-110+j*10,(Math.random()-.5)*18));
+    streams.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),sm));
+  }
+  scene.add(streams);
+
+  // FLOATING HEXAGONS
+  const hexGeo = new THREE.BufferGeometry();
+  const hexPts = [];
+  for(let h=0;h<6;h++){
+    hexPts.push(new THREE.Vector3(Math.cos(h*Math.PI/3),Math.sin(h*Math.PI/3),0));
+    hexPts.push(new THREE.Vector3(Math.cos((h+1)*Math.PI/3),Math.sin((h+1)*Math.PI/3),0));
+  }
+  hexGeo.setFromPoints(hexPts);
+  const hexMat = new THREE.LineBasicMaterial({color:0x00ff9f,transparent:true,opacity:.06,blending:THREE.AdditiveBlending});
+  for(let i=0;i<12;i++){
+    const hex = new THREE.LineSegments(hexGeo, hexMat);
+    hex.position.set((Math.random()-.5)*200,(Math.random()-.5)*160,(Math.random()-.5)*80);
+    hex.scale.setScalar(Math.random()*8+4);
+    hex.rotation.z = Math.random()*Math.PI;
+    hex.userData = {vy:(Math.random()-.5)*.005,rz:(Math.random()-.5)*.003};
+    scene.add(hex);
+  }
+
+  let mx=0,my=0;
+  document.addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2;});
+
+  const pts3 = scene.children.filter(c=>c instanceof THREE.Points)[0];
+  let t=0;
+  function animate(){
+    requestAnimationFrame(animate);
+    t+=.004;
+    if(pts3){pts3.rotation.y=t*.07;pts3.rotation.x=t*.025;}
+    grid.position.y = Math.sin(t)*.3;
+    scene.children.forEach(c=>{
+      if(c.userData.vy){c.position.y+=c.userData.vy;c.rotation.z+=c.userData.rz;if(Math.abs(c.position.y)>90)c.userData.vy*=-1;}
+    });
+    camera.position.x += (mx*8-camera.position.x)*.025;
+    camera.position.y += (-my*4-camera.position.y)*.025;
+    camera.lookAt(0,0,0);
+    R.render(scene,camera);
+  }
+  animate();
+
+  addEventListener('resize',()=>{
+    camera.aspect=innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+    R.setSize(innerWidth,innerHeight);
+  });
+})();
+
+// ═══════════════════════════════════
+// CUSTOM CURSOR
+// ═══════════════════════════════════
+(function(){
+  const dot=document.getElementById('cdot'), ring=document.getElementById('cring');
+  let rx=0,ry=0,dx=0,dy=0;
+  document.addEventListener('mousemove',e=>{dx=e.clientX;dy=e.clientY;dot.style.left=dx+'px';dot.style.top=dy+'px';});
+  document.addEventListener('mouseover',e=>{if(e.target.matches('a,button,.sig-card,.feat-card,.price-card'))ring.classList.add('big');});
+  document.addEventListener('mouseout',e=>{if(e.target.matches('a,button,.sig-card,.feat-card,.price-card'))ring.classList.remove('big');});
+  (function loop(){rx+=(dx-rx)*.11;ry+=(dy-ry)*.11;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+})();
+
+// ═══════════════════════════════════
+// GSAP ENTRANCE
+// ═══════════════════════════════════
+gsap.timeline({delay:.3})
+  .to('#h-badge',  {opacity:1,y:0,duration:.8,ease:'power3.out'})
+  .to('#h-orb',    {opacity:1,duration:1,ease:'power2.out'},'-=.4')
+  .to('#h-h1',     {opacity:1,y:0,duration:.8,ease:'power3.out'},'-=.5')
+  .to('#h-sub',    {opacity:1,y:0,duration:.7,ease:'power3.out'},'-=.5')
+  .to('#h-btns',   {opacity:1,y:0,duration:.6,ease:'power3.out'},'-=.4')
+  .to('#h-trust',  {opacity:1,y:0,duration:.5,ease:'power3.out'},'-=.3')
+  .to('#h-metrics',{opacity:1,y:0,duration:.6,ease:'power3.out'},'-=.3');
+
+// scroll fade
+const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.08});
+document.querySelectorAll('.fade-up').forEach(el=>io.observe(el));
+
+// card tilt
+document.addEventListener('mousemove',e=>{
+  document.querySelectorAll('.sig-card').forEach(c=>{
+    const r=c.getBoundingClientRect();
+    c.style.setProperty('--mx',(50+((e.clientX-r.left-r.width/2)/r.width)*30)+'%');
+    c.style.setProperty('--my',(50+((e.clientY-r.top-r.height/2)/r.height)*30)+'%');
+  });
+});
+
+// ═══════════════════════════════════
+// DATA
+// ═══════════════════════════════════
+const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+const DEMO = SUPABASE_URL === 'YOUR_SUPABASE_URL_HERE';
+
+const DEMO_DATA = [
+  {id:'1',symbol:'BTC/USDT',direction:'LONG',entry_price:65420,sl_price:63800,tp_price:68500,confidence:.84,timeframe:'1h',status:'ACTIVE',why:'RSI oversold + volume breakout + trendline support + social bullish spike',created_at:new Date().toISOString()},
+  {id:'2',symbol:'ETH/USDT',direction:'SHORT',entry_price:3240,sl_price:3380,tp_price:3020,confidence:.76,timeframe:'4h',status:'ACTIVE',why:'Bearish divergence + rejection at resistance + funding rate skewed short',created_at:new Date().toISOString()},
+  {id:'3',symbol:'SOL/USDT',direction:'LONG',entry_price:168,sl_price:161,tp_price:182,confidence:.71,timeframe:'1h',status:'ACTIVE',why:'Momentum reclaim + bullish orderflow + social sentiment spike on X',created_at:new Date().toISOString()},
+  {id:'4',symbol:'BTC/USDT',direction:'LONG',entry_price:62100,sl_price:60500,tp_price:65000,confidence:.81,timeframe:'4h',status:'HIT_TP',pnl_pct:4.67,closed_at:new Date(Date.now()-86400000).toISOString()},
+  {id:'5',symbol:'ETH/USDT',direction:'SHORT',entry_price:3480,sl_price:3600,tp_price:3200,confidence:.69,timeframe:'1h',status:'HIT_TP',pnl_pct:8.05,closed_at:new Date(Date.now()-172800000).toISOString()},
+  {id:'6',symbol:'BNB/USDT',direction:'LONG',entry_price:412,sl_price:398,tp_price:435,confidence:.62,timeframe:'30m',status:'HIT_SL',pnl_pct:-3.4,closed_at:new Date(Date.now()-259200000).toISOString()},
+  {id:'7',symbol:'SOL/USDT',direction:'SHORT',entry_price:185,sl_price:195,tp_price:168,confidence:.75,timeframe:'4h',status:'HIT_TP',pnl_pct:9.19,closed_at:new Date(Date.now()-345600000).toISOString()},
+  {id:'8',symbol:'AVAX/USDT',direction:'LONG',entry_price:38.5,sl_price:36.2,tp_price:43,confidence:.68,timeframe:'1h',status:'HIT_SL',pnl_pct:-5.97,closed_at:new Date(Date.now()-432000000).toISOString()},
+];
+
+async function fetchSignals(){
+  if(DEMO) return DEMO_DATA;
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/signals?select=*&order=created_at.desc`,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}});
+  return r.json();
+}
+
+function fmt(n){
+  if(n==null||n==='') return '—';
+  const v=Number(n);
+  return v>=1000?v.toLocaleString(undefined,{maximumFractionDigits:2}):v.toFixed(v<10?4:2);
+}
+
+function animNum(el,to,suf='',dec=0){
+  let from=0;const s=performance.now(),d=1400;
+  (function step(now){
+    const p=Math.min((now-s)/d,1),e=1-Math.pow(1-p,4),v=from+(to-from)*e;
+    el.textContent=(dec?v.toFixed(dec):Math.round(v))+suf;
+    if(p<1)requestAnimationFrame(step);
+  })(performance.now());
+}
+
+function buildTicker(data){
+  const t=document.getElementById('ticker');
+  const items=data.slice(0,8).map(s=>{
+    const d=(s.direction||'').toLowerCase();
+    return `<div class="tick-item"><span>${s.symbol}</span><span class="tm">|</span><span class="${d==='long'?'tl':'ts'}">${s.direction}</span><span class="tm">${Math.round((s.confidence||0)*100)}% CONF</span></div>`;
+  }).join('<span class="tm" style="color:rgba(255,255,255,.07)">———</span>');
+  t.innerHTML=items+items;
+}
+
+function renderStats(all,active,closed){
+  const win=closed.filter(s=>(s.pnl_pct||0)>0);
+  const wr=closed.length?(win.length/closed.length*100):0;
+  const pnl=closed.reduce((s,x)=>s+(x.pnl_pct||0),0);
+  animNum(document.getElementById('m-active'),active.length);
+  if(closed.length){
+    animNum(document.getElementById('m-wr'),wr,'%',1);
+    const pe=document.getElementById('m-pnl');
+    pe.className='metric-v '+(pnl>=0?'g':'r');
+    animNum(pe,pnl,'%',2);
+  }
+  animNum(document.getElementById('m-tot'),all.length);
+  const slots=Math.max(2,Math.floor(Math.random()*6)+2);
+  document.getElementById('nav-slots').textContent=slots+' SLOTS LEFT';
+}
+
+function renderActive(active){
+  const el=document.getElementById('act-grid');
+  document.getElementById('act-badge').textContent=active.length;
+  if(!active.length){
+    el.innerHTML=`<div style="grid-column:1/-1"><div class="empty"><div class="empty-i">🔍</div><div class="empty-t">No active signals. Bot is scanning…</div></div></div>`;
+    return;
+  }
+  el.innerHTML=active.map((s,i)=>{
+    const d=(s.direction||'').toLowerCase();
+    const conf=Math.round((s.confidence||0)*100);
+    return `<div class="sig-card ${d}" style="animation:none">
+      <div class="card-top">
+        <div class="card-sym">${s.symbol||'—'}</div>
+        <div class="dir-tag ${d}">${s.direction||'—'}</div>
+      </div>
+      <div class="price-grid">
+        <div class="pf"><label>Entry</label><div class="v en">${fmt(s.entry_price)}</div></div>
+        <div class="pf"><label>Stop Loss</label><div class="v sl">${fmt(s.sl_price)}</div></div>
+        <div class="pf"><label>Take Profit</label><div class="v tp">${fmt(s.tp_price)}</div></div>
+      </div>
+      ${s.why?`<div class="card-why">🤖 ${s.why}</div>`:''}
+      <div class="card-foot">
+        <div class="conf-wrap">
+          <div class="conf-lbl">Confidence: ${conf}%</div>
+          <div class="conf-track"><div class="conf-fill" style="width:0%" data-c="${conf}"></div></div>
+        </div>
+        <div class="tf-tag">${s.timeframe||'—'}</div>
+      </div>
+    </div>`;
+  }).join('');
+  setTimeout(()=>document.querySelectorAll('.conf-fill[data-c]').forEach(b=>b.style.width=b.dataset.c+'%'),80);
+}
+
+function renderHistory(closed){
+  const tb=document.getElementById('hist-body');
+  document.getElementById('hist-badge').textContent=closed.length;
+  if(!closed.length){
+    tb.innerHTML=`<tr><td colspan="9"><div class="empty"><div class="empty-i">📭</div><div class="empty-t">No closed signals yet.</div></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML=closed.slice(0,30).map(s=>{
+    const d=(s.direction||'').toLowerCase();
+    const st=(s.status||'').toLowerCase().replace('_','');
+    const pnl=s.pnl_pct!=null?Number(s.pnl_pct).toFixed(2):null;
+    const ph=pnl!=null?`<span class="${pnl>=0?'ppos':'pneg'}">${pnl>=0?'+':''}${pnl}%</span>`:'—';
+    const date=s.closed_at?new Date(s.closed_at).toLocaleDateString():'—';
+    const res=(s.status||'').replace('HIT_','');
+    return `<tr>
+      <td style="font-family:var(--fh);font-size:.82rem;font-weight:700;letter-spacing:.05em">${s.symbol||'—'}</td>
+      <td><span class="pill ${d}">${s.direction||'—'}</span></td>
+      <td>${fmt(s.entry_price)}</td>
+      <td class="hide-m" style="color:var(--red)">${fmt(s.sl_price)}</td>
+      <td class="hide-m" style="color:var(--green)">${fmt(s.tp_price)}</td>
+      <td>${ph}</td>
+      <td><span class="pill ${res.toLowerCase()}">${res||s.status}</span></td>
+      <td class="hide-m" style="color:var(--muted);font-family:var(--fh);font-size:.65rem">${s.timeframe||'—'}</td>
+      <td class="hide-m" style="color:var(--muted)">${date}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadData(){
+  try{
+    const data=await fetchSignals();
+    const active=data.filter(s=>s.status==='ACTIVE');
+    const closed=data.filter(s=>s.status!=='ACTIVE');
+    renderStats(data,active,closed);
+    renderActive(active);
+    renderHistory(closed);
+    buildTicker(data);
+  }catch(e){
+    console.error(e);
+    document.getElementById('act-grid').innerHTML=`<div style="grid-column:1/-1"><div class="empty"><div class="empty-i">⚠️</div><div class="empty-t">Error loading. Check console.</div></div></div>`;
+  }
+}
+
+loadData();
+setInterval(loadData,60000);
+
+if(DEMO){
+  const b=document.createElement('div');
+  b.style.cssText='position:fixed;bottom:20px;right:20px;z-index:999;background:rgba(123,47,255,.15);border:1px solid rgba(123,47,255,.4);border-radius:10px;padding:10px 16px;font-family:var(--fh);font-size:.6rem;letter-spacing:.1em;color:#a06fff;backdrop-filter:blur(12px)';
+  b.textContent='⚡ DEMO MODE — Connect Supabase to go live';
+  document.body.appendChild(b);
+}
+</script>
+</body>
+</html>
