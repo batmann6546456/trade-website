@@ -906,7 +906,6 @@ function renderActive(active){
         <div class="pf"><label>Stop Loss</label><div class="v sl">${fmt(s.sl_price)}</div></div>
         <div class="pf"><label>Take Profit</label><div class="v tp">${fmt(s.tp_price)}</div></div>
       </div>
-      ${s.why?`<div class="card-why">🤖 ${s.why}</div>`:''}
       <div class="card-foot" style="justify-content: flex-end;">
         <div class="tf-tag">${s.timeframe||'—'}</div>
       </div>
