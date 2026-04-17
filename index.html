@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EdgeX | Real-Time AI Auto-Trading Signals for Binance Futures</title>
+  <title>Trade AI | Real-Time AI Auto-Trading Signals for Binance Futures</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -462,7 +462,7 @@ footer{position:relative;z-index:2;border-top:1px solid var(--border);padding:36
 <!-- BOOT SCREEN -->
 <div class="boot-screen" id="boot">
   <div class="scan-line"></div>
-  <div class="boot-logo">EDGE<span style="color:var(--cyan)">X</span></div>
+  <div class="boot-logo">TRADE<span style="color:var(--cyan)"> AI</span></div>
   <div class="boot-bar"><div class="boot-fill" id="boot-fill"></div></div>
   <div class="boot-txt" id="boot-txt">INITIALIZING AI ENGINE…</div>
 </div>
@@ -479,7 +479,7 @@ footer{position:relative;z-index:2;border-top:1px solid var(--border);padding:36
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="#" class="logo"><div class="logo-box">⚡</div>EDGE<span style="color:var(--cyan)">X</span></a>
+    <a href="#" class="logo"><div class="logo-box">⚡</div>TRADE<span style="color:var(--cyan)"> AI</span></a>
     <div class="nav-r">
       <div class="live-pill"><span class="live-dot"></span>AI • LIVE</div>
       <div class="nav-slots" id="nav-slots">— SLOTS LEFT</div>
@@ -552,7 +552,7 @@ footer{position:relative;z-index:2;border-top:1px solid var(--border);padding:36
 <!-- FEATURES -->
 <section class="section page fade-up">
   <div class="sec-head">
-    <div class="sec-title">🔧 How EdgeX Thinks (The Secret Sauce)</div>
+    <div class="sec-title">🔧 How Trade AI Thinks (The Secret Sauce)</div>
   </div>
   <div class="feat-grid" id="feat-grid">
     <div class="feat-card"><div class="feat-icon">🏦</div>Institutional Smart Money Concepts</div>
@@ -620,15 +620,15 @@ footer{position:relative;z-index:2;border-top:1px solid var(--border);padding:36
       <h3>Ready to trade with verified AI signals?</h3>
       <p>Live entries, transparent outcomes, and risk controls built in.</p>
     </div>
-    <a href="#pricing" class="btn-cta">🚀 Unlock EdgeX Pro</a>
+    <a href="#pricing" class="btn-cta">🚀 Unlock Trade AI Pro</a>
   </div>
 </section>
 
 </main>
 
 <footer>
-  <div class="foot-logo">EDGE<span style="color:var(--cyan)">X</span></div>
-  <div class="foot-txt">⚠ Cryptocurrency trading involves substantial risk.<br/>Past performance does not guarantee future results. Trade responsibly. © 2025 EdgeX</div>
+  <div class="foot-logo">TRADE<span style="color:var(--cyan)"> AI</span></div>
+  <div class="foot-txt">⚠ Cryptocurrency trading involves substantial risk.<br/>Past performance does not guarantee future results. Trade responsibly. © 2025 Trade AI</div>
 </footer>
 
 <!-- RECHARTS MOUNT -->
@@ -865,7 +865,7 @@ function buildTicker(data){
   const t=document.getElementById('ticker');
   const items=data.slice(0,8).map(s=>{
     const d=(s.direction||'').toLowerCase();
-    return `<div class="tick-item"><span>${s.symbol}</span><span class="tm">|</span><span class="${d==='long'?'tl':'ts'}">${s.direction}</span><span class="tm">${Math.round((s.confidence||0)*100)}% CONF</span></div>`;
+    return `<div class="tick-item"><span>${s.symbol}</span><span class="tm">|</span><span class="${d==='long'?'tl':'ts'}">${s.direction}</span></div>`;
   }).join('<span class="tm" style="color:rgba(255,255,255,.07)">———</span>');
   t.innerHTML=items+items;
 }
@@ -907,11 +907,7 @@ function renderActive(active){
         <div class="pf"><label>Take Profit</label><div class="v tp">${fmt(s.tp_price)}</div></div>
       </div>
       ${s.why?`<div class="card-why">🤖 ${s.why}</div>`:''}
-      <div class="card-foot">
-        <div class="conf-wrap">
-          <div class="conf-lbl">Confidence: ${conf}%</div>
-          <div class="conf-track"><div class="conf-fill" style="width:0%" data-c="${conf}"></div></div>
-        </div>
+      <div class="card-foot" style="justify-content: flex-end;">
         <div class="tf-tag">${s.timeframe||'—'}</div>
       </div>
     </div>`;
