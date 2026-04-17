@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EdgeX — AI Crypto Signals</title>
+  <title>EdgeX | Real-Time AI Auto-Trading Signals for Binance Futures</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -500,15 +500,15 @@ footer{position:relative;z-index:2;border-top:1px solid var(--border);padding:36
     <div class="orb-r2"></div>
     <div class="orb-core"></div>
   </div>
-  <h1 id="h-h1">Real Signals.<br/><em>Real Results.</em></h1>
+  <h1 id="h-h1">Real Signals.<br/><em> Real Results.</em></h1>
   <p class="hero-sub" id="h-sub">AI-powered crypto signals with full transparency — entry, exit &amp; stop-loss powered by 5–6 indicator confluence and live social sentiment analysis.</p>
   <div class="hero-btns" id="h-btns">
     <a href="#signals" class="btn-cta">⚡ View Live Signals</a>
     <a href="#performance" class="btn-ghost">📊 Performance →</a>
   </div>
   <div class="trust-strip" id="h-trust">
-    <div class="trust-item">✓ +124% ROI — Last 90 Days</div>
-    <div class="trust-item">✓ Tracked via Binance API</div>
+    <div class="trust-item">✓ 70%+ Win Rate (1500+ Backtest Bars)</div>
+    <div class="trust-item">✓ Automated Risk Management built-in</div>
     <div class="trust-item">✓ Updated Every 60 Seconds</div>
     <div class="trust-item">✓ No Hidden Trades</div>
   </div>
@@ -551,32 +551,33 @@ footer{position:relative;z-index:2;border-top:1px solid var(--border);padding:36
 
 <!-- FEATURES -->
 <section class="section page fade-up">
-  <div class="sec-head"><div class="sec-title">🔧 Features</div></div>
+  <div class="sec-head">
+    <div class="sec-title">🔧 How EdgeX Thinks (The Secret Sauce)</div>
+  </div>
   <div class="feat-grid" id="feat-grid">
-    <div class="feat-card"><div class="feat-icon">🤖</div>AI Multi-Indicator Engine</div>
-    <div class="feat-card"><div class="feat-icon">📡</div>Real-Time Market Tracking</div>
-    <div class="feat-card"><div class="feat-icon">🔔</div>Telegram Alerts</div>
+    <div class="feat-card"><div class="feat-icon">🏦</div>Institutional Smart Money Concepts</div>
+    <div class="feat-card"><div class="feat-icon">📡</div>Machine Learning Optimization</div>
+    <div class="feat-card"><div class="feat-icon">🌊</div>Live Liquidations & Order Flow</div>
     <div class="feat-card"><div class="feat-icon">🌐</div>Social Sentiment Analysis</div>
-    <div class="feat-card"><div class="feat-icon">📊</div>Risk Management Built-In</div>
-    <div class="feat-card"><div class="feat-icon">⚙️</div>Auto-Trade (Optional)</div>
+    <div class="feat-card"><div class="feat-icon">📊</div>Automated Risk Management</div>
+    <div class="feat-card"><div class="feat-icon">⚙️</div>Zero-Latency Auto-Trade Selection</div>
   </div>
 </section>
 
-<!-- HISTORY -->
+<!-- HISTORY (Unified Trade Monitor) -->
 <section class="section page fade-up" id="history">
   <div class="sec-head">
-    <div class="sec-title">📉 Signal History <span class="cnt-badge" id="hist-badge">0</span></div>
+    <div class="sec-title">📉 Trade Monitor <span class="cnt-badge" id="hist-badge">0</span></div>
   </div>
   <div class="table-wrap">
     <table>
       <thead><tr>
-        <th>Symbol</th><th>Dir</th><th>Entry</th>
-        <th class="hide-m">SL</th><th class="hide-m">TP</th>
-        <th>P&amp;L</th><th>Result</th>
-        <th class="hide-m">TF</th><th class="hide-m">Date</th>
+        <th>Symbol</th><th>Action</th><th>State</th>
+        <th>Buy Price</th><th>Sell Price</th>
+        <th>PnL</th>
       </tr></thead>
       <tbody id="hist-body">
-        <tr><td colspan="9"><div class="empty"><div class="empty-i">⏳</div><div class="empty-t">Loading…</div></div></td></tr>
+        <tr><td colspan="6"><div class="empty"><div class="empty-i">⏳</div><div class="empty-t">Loading…</div></div></td></tr>
       </tbody>
     </table>
   </div>
@@ -600,12 +601,12 @@ footer{position:relative;z-index:2;border-top:1px solid var(--border);padding:36
       <div class="price-badge">MOST POPULAR</div>
       <div class="price-name">Pro Plan</div>
       <div class="price-amt pro">$19<span style="font-size:1rem;color:var(--muted)">/mo</span></div>
+      <p style="font-size:0.75rem; color:var(--red); font-weight: 600; padding-bottom: 15px;">In crypto, a 15-minute delay usually means missing the entire move. Upgrade to Pro for instant, 0-latency execution.</p>
       <ul class="price-items">
-        <li class="on">All signals unlocked</li>
-        <li class="on">Real-time alerts</li>
-        <li class="on">Full SL / TP levels</li>
-        <li class="on">AI signal explanation</li>
-        <li class="on">Telegram integration</li>
+        <li class="on">All signals unlocked (Zero Latency)</li>
+        <li class="on">Instant Webhook & Telegram Alerts</li>
+        <li class="on">Full SL / TP levels included</li>
+        <li class="on">AI signal logic explanations</li>
       </ul>
       <a href="#" class="btn-cta" style="display:inline-block">🚀 Upgrade to Pro</a>
     </div>
@@ -918,30 +919,29 @@ function renderActive(active){
   setTimeout(()=>document.querySelectorAll('.conf-fill[data-c]').forEach(b=>b.style.width=b.dataset.c+'%'),80);
 }
 
-function renderHistory(closed){
+function renderHistory(active, closed){
   const tb=document.getElementById('hist-body');
-  document.getElementById('hist-badge').textContent=closed.length;
-  if(!closed.length){
-    tb.innerHTML=`<tr><td colspan="9"><div class="empty"><div class="empty-i">📭</div><div class="empty-t">No closed signals yet.</div></div></td></tr>`;
+  const all = [...active, ...closed];
+  document.getElementById('hist-badge').textContent=all.length;
+  if(!all.length){
+    tb.innerHTML=`<tr><td colspan="6"><div class="empty"><div class="empty-i">📭</div><div class="empty-t">No trades to display.</div></div></td></tr>`;
     return;
   }
-  tb.innerHTML=closed.slice(0,30).map(s=>{
+  tb.innerHTML=all.slice(0,30).map(s=>{
     const d=(s.direction||'').toLowerCase();
-    const st=(s.status||'').toLowerCase().replace('_','');
-    const pnl=s.pnl_pct!=null?Number(s.pnl_pct).toFixed(2):null;
-    const ph=pnl!=null?`<span class="${pnl>=0?'ppos':'pneg'}">${pnl>=0?'+':''}${pnl}%</span>`:'—';
-    const date=s.closed_at?new Date(s.closed_at).toLocaleDateString():'—';
-    const res=(s.status||'').replace('HIT_','');
+    const isLive = s.status === 'ACTIVE';
+    const stateStr = isLive ? 'Live' : 'Closed';
+    const sellPrice = isLive ? '---' : fmt(s.tp_price || s.exit_price || s.sl_price);
+    const pnl = s.pnl_pct!=null ? Number(s.pnl_pct).toFixed(2) : null;
+    const ph = isLive ? '---' : (pnl!=null ? `<span class="${pnl>=0?'ppos':'pneg'}">${pnl>=0?'+':''}${pnl}%</span>` : '—');
+    
     return `<tr>
       <td style="font-family:var(--fh);font-size:.82rem;font-weight:700;letter-spacing:.05em">${s.symbol||'—'}</td>
       <td><span class="pill ${d}">${s.direction||'—'}</span></td>
+      <td><span class="pill ${isLive ? 'tp' : 'sl'}">${stateStr}</span></td>
       <td>${fmt(s.entry_price)}</td>
-      <td class="hide-m" style="color:var(--red)">${fmt(s.sl_price)}</td>
-      <td class="hide-m" style="color:var(--green)">${fmt(s.tp_price)}</td>
+      <td>${sellPrice}</td>
       <td>${ph}</td>
-      <td><span class="pill ${res.toLowerCase()}">${res||s.status}</span></td>
-      <td class="hide-m" style="color:var(--muted);font-family:var(--fh);font-size:.65rem">${s.timeframe||'—'}</td>
-      <td class="hide-m" style="color:var(--muted)">${date}</td>
     </tr>`;
   }).join('');
 }
@@ -953,7 +953,7 @@ async function loadData(){
     const closed=data.filter(s=>s.status!=='ACTIVE');
     renderStats(data,active,closed);
     renderActive(active);
-    renderHistory(closed);
+    renderHistory(active, closed);
     buildTicker(data);
   }catch(e){
     console.error(e);
