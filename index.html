@@ -10,8 +10,7 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
 <style>
 /* ── TOKENS ── */
 :root {
@@ -148,8 +147,9 @@ nav::after {
 }
 .btn-cta:hover{
   background:var(--pink);
-  box-shadow:0 0 30px rgba(255,0,255,.6);
-  transform: translateX(2px) translateY(-2px);
+  box-shadow: 0 0 30px rgba(255,0,255,.8), inset 0 0 15px rgba(255,255,255,0.4);
+  transform: translateX(2px) translateY(-3px) scale(1.02);
+  text-shadow: 0 0 5px rgba(255,255,255,0.8);
 }
 
 /* ── GLITCH ANIMATION ── */
@@ -240,7 +240,14 @@ main{position:relative;z-index:2;}
   transition:all .2s;display:inline-block;
   clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }
-.btn-ghost:hover{background:rgba(0,255,255,.1);box-shadow:0 0 22px rgba(0,255,255,.3); border-color: var(--pink); color: var(--pink);}
+.btn-ghost:hover{
+  background:rgba(0,255,255,.15);
+  box-shadow: 0 0 25px rgba(0,255,255,.4), inset 0 0 10px rgba(0,255,255,0.2);
+  border-color: var(--cyan); 
+  color: #fff;
+  text-shadow: 0 0 8px var(--cyan);
+  transform: translateY(-2px);
+}
 
 /* ── TRUST STRIP ── */
 .trust-strip{
@@ -541,6 +548,15 @@ footer{position:relative;z-index:2;border-top:1px dashed var(--border);padding:3
   <div class="ticker-t" id="ticker"></div>
 </div>
 
+<!-- TERMINAL LOG -->
+<section class="section page fade-up" style="padding: 20px 0;">
+  <div style="background: rgba(0,0,0,0.8); border: 1px solid var(--border); padding: 15px; font-family: var(--fb); font-size: 0.8rem; color: var(--green); height: 120px; overflow: hidden; position: relative; box-shadow: inset 0 0 20px rgba(0,255,159,0.1);">
+    <div style="margin-bottom: 8px; color: var(--cyan); border-bottom: 1px dashed var(--border); padding-bottom: 4px;">// SYS.EXECUTION_LOG</div>
+    <div id="term-log" style="display: flex; flex-direction: column; gap: 4px;"></div>
+    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, #000);"></div>
+  </div>
+</section>
+
 <!-- PERFORMANCE -->
 <section class="section page fade-up" id="performance">
   <div class="sec-head">
@@ -651,8 +667,9 @@ footer{position:relative;z-index:2;border-top:1px dashed var(--border);padding:3
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-<script type="text/babel">
+<script>
 const { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
+const e = React.createElement;
 
 const perfData = [
   {d:'W1',eq:100},{d:'W2',eq:107},{d:'W3',eq:113},
@@ -661,26 +678,49 @@ const perfData = [
 ];
 
 function Chart() {
-  return (
-    <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={perfData} margin={{top:10,right:10,left:-10,bottom:0}}>
-        <defs>
-          <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%"  stopColor="#00ff9f" stopOpacity={0.35}/>
-            <stop offset="95%" stopColor="#00ff9f" stopOpacity={0}/>
-          </linearGradient>
-        </defs>
-        <CartesianGrid stroke="rgba(0,255,159,0.06)" strokeDasharray="3 3"/>
-        <XAxis dataKey="d" stroke="#3a5060" tick={{fontFamily:"'Orbitron',sans-serif",fontSize:10}}/>
-        <YAxis stroke="#3a5060" tick={{fontFamily:"'Orbitron',sans-serif",fontSize:10}}/>
-        <Tooltip contentStyle={{background:'#041014',border:'1px solid rgba(0,255,159,.25)',fontFamily:"'Orbitron',sans-serif",fontSize:11,borderRadius:8}}/>
-        <Area type="monotone" dataKey="eq" stroke="#00d4ff" fill="url(#cg)" strokeWidth={2.5}/>
-      </AreaChart>
-    </ResponsiveContainer>
+  return e(ResponsiveContainer, { width: "100%", height: "100%" },
+    e(AreaChart, { data: perfData, margin: {top:10,right:10,left:-10,bottom:0} },
+      e('defs', null,
+        e('linearGradient', { id: "cg", x1: "0", y1: "0", x2: "0", y2: "1" },
+          e('stop', { offset: "5%", stopColor: "#00ff9f", stopOpacity: 0.35 }),
+          e('stop', { offset: "95%", stopColor: "#00ff9f", stopOpacity: 0 })
+        )
+      ),
+      e(CartesianGrid, { stroke: "rgba(0,255,159,0.06)", strokeDasharray: "3 3" }),
+      e(XAxis, { dataKey: "d", stroke: "#3a5060", tick: {fontFamily:"'Orbitron',sans-serif",fontSize:10} }),
+      e(YAxis, { stroke: "#3a5060", tick: {fontFamily:"'Orbitron',sans-serif",fontSize:10} }),
+      e(Tooltip, { contentStyle: {background:'#041014',border:'1px solid rgba(0,255,159,.25)',fontFamily:"'Orbitron',sans-serif",fontSize:11,borderRadius:8} }),
+      e(Area, { type: "monotone", dataKey: "eq", stroke: "#00d4ff", fill: "url(#cg)", strokeWidth: 2.5 })
+    )
   );
 }
 
-ReactDOM.createRoot(document.getElementById('chart-root')).render(<Chart/>);
+ReactDOM.createRoot(document.getElementById('chart-root')).render(e(Chart));
+
+// Terminal Log Animation
+const termLog = document.getElementById('term-log');
+const logMsgs = [
+  "[SYS.ACK] BTC/USDT LONG CLOSED + 4.2% PROFIT",
+  "[SYS.ACK] ETH/USDT SHORT CLOSED + 2.8% PROFIT",
+  "[NET.SYNC] ALGORITHM CONFIDENCE INCREASED TO 84%",
+  "[SYS.ACK] SOL/USDT LONG STOPLOSS MOVED TO BREAKEVEN",
+  "[SECURE] NEW PRO USER CONNECTED VIA WEBHOOK",
+  "[SYS.ACK] AVAX/USDT LONG CLOSED + 6.1% PROFIT",
+  "[DATA] LIQUIDITY POOL IMBALANCE DETECTED"
+];
+if(termLog) {
+  let ls = "";
+  for(let i=0; i<3; i++) {
+    ls += `<div>> ${logMsgs[Math.floor(Math.random()*logMsgs.length)]}</div>`;
+  }
+  termLog.innerHTML = ls;
+  setInterval(() => {
+    const nd = document.createElement('div');
+    nd.innerHTML = `> ${logMsgs[Math.floor(Math.random()*logMsgs.length)]}`;
+    termLog.appendChild(nd);
+    if(termLog.children.length > 4) termLog.removeChild(termLog.firstChild);
+  }, 3500);
+}
 </script>
 
 <script>
