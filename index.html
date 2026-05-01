@@ -4,13 +4,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Trade AI | Real-Time AI Auto-Trading Signals for Binance Futures</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>"/>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.min.js"></script>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+
 <style>
 /* ── TOKENS ── */
 :root {
@@ -151,6 +152,29 @@ nav::after {
   transform: translateX(2px) translateY(-3px) scale(1.02);
   text-shadow: 0 0 5px rgba(255,255,255,0.8);
 }
+
+/* ── CONFIDENCE BAR ── */
+.conf-wrap{margin-top:12px;}
+.conf-l{display:flex;justify-content:space-between;font-size:.62rem;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.conf-bar{height:4px;background:rgba(255,255,255,.05);position:relative;overflow:hidden;}
+.conf-fill{height:100%;background:linear-gradient(90deg, var(--cyan), var(--pink));width:0;transition:width 1.2s cubic-bezier(.23,1,.32,1);}
+
+/* ── TERMINAL LOG ── */
+.term-wrap{
+  background:#0a0a0a;border:1px solid var(--border);padding:20px;
+  font-family:var(--fb);font-size:.8rem;height:300px;overflow-y:auto;
+  position:relative;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+}
+.term-line{margin-bottom:6px;display:flex;gap:12px;opacity:0;transform:translateX(-10px);animation:logIn .3s forwards;}
+@keyframes logIn{to{opacity:1;transform:none}}
+.term-ts{color:var(--muted);min-width:85px;}
+.term-msg{color:var(--text);line-height:1.4;}
+.term-msg.sys{color:var(--cyan)}
+.term-msg.trade{color:var(--green)}
+.term-msg.warn{color:var(--pink)}
+.term-cursor{display:inline-block;width:8px;height:14px;background:var(--cyan);vertical-align:middle;animation:blink 1s step-end infinite;margin-left:4px;}
+@keyframes blink{50%{opacity:0}}
 
 /* ── GLITCH ANIMATION ── */
 .glitch-hover:hover {
@@ -548,15 +572,6 @@ footer{position:relative;z-index:2;border-top:1px dashed var(--border);padding:3
   <div class="ticker-t" id="ticker"></div>
 </div>
 
-<!-- TERMINAL LOG -->
-<section class="section page fade-up" style="padding: 20px 0;">
-  <div style="background: rgba(0,0,0,0.8); border: 1px solid var(--border); padding: 15px; font-family: var(--fb); font-size: 0.8rem; color: var(--green); height: 120px; overflow: hidden; position: relative; box-shadow: inset 0 0 20px rgba(0,255,159,0.1);">
-    <div style="margin-bottom: 8px; color: var(--cyan); border-bottom: 1px dashed var(--border); padding-bottom: 4px;">// SYS.EXECUTION_LOG</div>
-    <div id="term-log" style="display: flex; flex-direction: column; gap: 4px;"></div>
-    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, #000);"></div>
-  </div>
-</section>
-
 <!-- PERFORMANCE -->
 <section class="section page fade-up" id="performance">
   <div class="sec-head">
@@ -565,6 +580,17 @@ footer{position:relative;z-index:2;border-top:1px dashed var(--border);padding:3
   <div class="chart-card">
     <h3>📈 Equity Curve — Last 10 Weeks</h3>
     <div id="chart-root" style="height:280px"></div>
+  </div>
+</section>
+
+<!-- LIVE EXECUTION LOG -->
+<section class="section page fade-up" id="log-section">
+  <div class="sec-head">
+    <div class="sec-title">📡 Live Execution Log</div>
+    <div class="nav-slots" style="font-size:.6rem">STATUS: [ AGENT_ACTIVE ]</div>
+  </div>
+  <div class="term-wrap" id="term-log">
+    <div class="term-line"><span class="term-ts">[00:00:00]</span><span class="term-msg sys">SYSTEM INITIALIZED. WAITING FOR DATASTREAM…</span></div>
   </div>
 </section>
 
@@ -664,63 +690,38 @@ footer{position:relative;z-index:2;border-top:1px dashed var(--border);padding:3
 </footer>
 
 <!-- RECHARTS MOUNT -->
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
 <script>
-const { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
-const e = React.createElement;
+(function(){
+  const { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
+  const e = React.createElement;
 
-const perfData = [
-  {d:'W1',eq:100},{d:'W2',eq:107},{d:'W3',eq:113},
-  {d:'W4',eq:110},{d:'W5',eq:121},{d:'W6',eq:129},
-  {d:'W7',eq:138},{d:'W8',eq:146},{d:'W9',eq:151},{d:'W10',eq:160}
-];
+  const perfData = [
+    {d:'W1',eq:100},{d:'W2',eq:107},{d:'W3',eq:113},
+    {d:'W4',eq:110},{d:'W5',eq:121},{d:'W6',eq:129},
+    {d:'W7',eq:138},{d:'W8',eq:146},{d:'W9',eq:151},{d:'W10',eq:160}
+  ];
 
-function Chart() {
-  return e(ResponsiveContainer, { width: "100%", height: "100%" },
-    e(AreaChart, { data: perfData, margin: {top:10,right:10,left:-10,bottom:0} },
-      e('defs', null,
-        e('linearGradient', { id: "cg", x1: "0", y1: "0", x2: "0", y2: "1" },
-          e('stop', { offset: "5%", stopColor: "#00ff9f", stopOpacity: 0.35 }),
-          e('stop', { offset: "95%", stopColor: "#00ff9f", stopOpacity: 0 })
-        )
-      ),
-      e(CartesianGrid, { stroke: "rgba(0,255,159,0.06)", strokeDasharray: "3 3" }),
-      e(XAxis, { dataKey: "d", stroke: "#3a5060", tick: {fontFamily:"'Orbitron',sans-serif",fontSize:10} }),
-      e(YAxis, { stroke: "#3a5060", tick: {fontFamily:"'Orbitron',sans-serif",fontSize:10} }),
-      e(Tooltip, { contentStyle: {background:'#041014',border:'1px solid rgba(0,255,159,.25)',fontFamily:"'Orbitron',sans-serif",fontSize:11,borderRadius:8} }),
-      e(Area, { type: "monotone", dataKey: "eq", stroke: "#00d4ff", fill: "url(#cg)", strokeWidth: 2.5 })
-    )
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('chart-root')).render(e(Chart));
-
-// Terminal Log Animation
-const termLog = document.getElementById('term-log');
-const logMsgs = [
-  "[SYS.ACK] BTC/USDT LONG CLOSED + 4.2% PROFIT",
-  "[SYS.ACK] ETH/USDT SHORT CLOSED + 2.8% PROFIT",
-  "[NET.SYNC] ALGORITHM CONFIDENCE INCREASED TO 84%",
-  "[SYS.ACK] SOL/USDT LONG STOPLOSS MOVED TO BREAKEVEN",
-  "[SECURE] NEW PRO USER CONNECTED VIA WEBHOOK",
-  "[SYS.ACK] AVAX/USDT LONG CLOSED + 6.1% PROFIT",
-  "[DATA] LIQUIDITY POOL IMBALANCE DETECTED"
-];
-if(termLog) {
-  let ls = "";
-  for(let i=0; i<3; i++) {
-    ls += `<div>> ${logMsgs[Math.floor(Math.random()*logMsgs.length)]}</div>`;
+  function Chart() {
+    return e(ResponsiveContainer, { width: "100%", height: "100%" },
+      e(AreaChart, { data: perfData, margin: { top: 10, right: 10, left: -10, bottom: 0 } },
+        e('defs', null,
+          e('linearGradient', { id: "cg", x1: "0", y1: "0", x2: "0", y2: "1" },
+            e('stop', { offset: "5%", stopColor: "#00ff9f", stopOpacity: 0.35 }),
+            e('stop', { offset: "95%", stopColor: "#00ff9f", stopOpacity: 0 })
+          )
+        ),
+        e(CartesianGrid, { stroke: "rgba(0,255,159,0.06)", strokeDasharray: "3 3" }),
+        e(XAxis, { dataKey: "d", stroke: "#3a5060", tick: { fontFamily: "'Orbitron',sans-serif", fontSize: 10 } }),
+        e(YAxis, { stroke: "#3a5060", tick: { fontFamily: "'Orbitron',sans-serif", fontSize: 10 } }),
+        e(Tooltip, { contentStyle: { background: '#041014', border: '1px solid rgba(0,255,159,.25)', fontFamily: "'Orbitron',sans-serif", fontSize: 11, borderRadius: 8 } }),
+        e(Area, { type: "monotone", dataKey: "eq", stroke: "#00d4ff", fill: "url(#cg)", strokeWidth: 2.5 })
+      )
+    );
   }
-  termLog.innerHTML = ls;
-  setInterval(() => {
-    const nd = document.createElement('div');
-    nd.innerHTML = `> ${logMsgs[Math.floor(Math.random()*logMsgs.length)]}`;
-    termLog.appendChild(nd);
-    if(termLog.children.length > 4) termLog.removeChild(termLog.firstChild);
-  }, 3500);
-}
+
+  const rootEl = document.getElementById('chart-root');
+  if(rootEl) ReactDOM.createRoot(rootEl).render(e(Chart));
+})();
 </script>
 
 <script>
@@ -962,7 +963,11 @@ function renderActive(active){
         <div class="pf"><label>Stop Loss</label><div class="v sl">${fmt(s.sl_price)}</div></div>
         <div class="pf"><label>Take Profit</label><div class="v tp">${fmt(s.tp_price)}</div></div>
       </div>
-      <div class="card-foot" style="justify-content: flex-end;">
+      <div class="conf-wrap">
+        <div class="conf-l"><span>AI Confidence</span><span>${conf}%</span></div>
+        <div class="conf-bar"><div class="conf-fill" data-c="${conf}"></div></div>
+      </div>
+      <div class="card-foot">
         <div class="tf-tag">${s.timeframe||'—'}</div>
       </div>
     </div>`;
@@ -1021,6 +1026,40 @@ if(DEMO){
   b.textContent='⚡ DEMO MODE — Connect Supabase to go live';
   document.body.appendChild(b);
 }
+
+// ═══════════════════════════════════
+// LOG TERMINAL SIMULATION
+// ═══════════════════════════════════
+(function(){
+  const log = document.getElementById('term-log');
+  const add = (msg, type='') => {
+    const ts = new Date().toLocaleTimeString('en-GB', {hour12:false});
+    const line = document.createElement('div');
+    line.className = 'term-line';
+    line.innerHTML = `<span class="term-ts">[${ts}]</span><span class="term-msg ${type}">${msg}</span>`;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+    if(log.children.length > 50) log.removeChild(log.children[1]); // Keep first init line
+  };
+  
+  const msgs = [
+    {m:'Scanning Binance Futures orderbook...', t:'sys'},
+    {m:'Sentiment analysis: Bullish bias detected on X (Twitter).', t:'sys'},
+    {m:'Checking SME indicators: Liquidity sweep found at 65,200.', t:'sys'},
+    {m:'Signal Confluence found for BTC/USDT (1h).', t:'trade'},
+    {m:'Executing paper trade: BTC/USDT LONG @ Market.', t:'trade'},
+    {m:'Updating ATR trailing stops for all positions.', t:'sys'},
+    {m:'Rate limit buffer: Sleeping for 200ms.', t:'warn'},
+    {m:'Sentiment shift: ETH/USDT social volume increasing.', t:'sys'}
+  ];
+
+  setInterval(() => {
+    if(Math.random() > 0.7) {
+      const item = msgs[Math.floor(Math.random()*msgs.length)];
+      add(item.m, item.t);
+    }
+  }, 4000);
+})();
 </script>
 </body>
 </html>
