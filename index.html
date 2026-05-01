@@ -889,60 +889,32 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ==========================
-// TRANSFORM
-// ==========================
-function transformOrders(rows) {
-  return rows.map(o => {
-    const entry = Number(o.jr_price || 0);
-    const exit = o.exit_price ? Number(o.exit_price) : null;
-    let pnl = null;
-
-    if (!o.jr_is_open && exit) {
-      if (o.jr_order_side === "buy") {
-        pnl = ((exit - entry) / entry) * 100;
-      } else {
-        pnl = ((entry - exit) / entry) * 100;
-      }
-    }
-
-    return {
-      id: o.id,
-      symbol: o.jr_pair || '—',
-      direction: (o.jr_order_side || 'LONG').toUpperCase(),
-      entry_price: entry,
-      exit_price: exit,
-      status: o.jr_is_open ? "ACTIVE" : "CLOSED",
-      pnl_pct: pnl,
-      timeframe: o.timeframe || "1h",
-      confidence: o.confidence || 0,
-      sl_price: o.sl_price || 0,
-      tp_price: o.tp_price || 0
-    };
-  });
-}
-
-// ==========================
 // FETCH
 // ==========================
 async function fetchSignals() {
   const { data, error } = await supabaseClient
-    .from("orders")
+    .from("signals")
     .select("*")
-    .order("id", { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error(error);
     return [];
   }
 
-  return transformOrders(data);
+  return data.map(s => ({
+    ...s,
+    direction: (s.action || 'LONG').toUpperCase(),
+    // Fallback for UI mapping
+    status: s.status === 'ACTIVE' ? 'ACTIVE' : 'CLOSED'
+  }));
 }
 
 function calcPnL(s){
   if(s.pnl_pct != null) return Number(s.pnl_pct);
   if(!s.entry_price || (!s.exit_price && !s.tp_price && !s.sl_price)) return 0;
   const exit = s.exit_price || s.tp_price || s.sl_price;
-  const side = (s.direction||'').toUpperCase();
+  const side = (s.action||'').toUpperCase();
   if(side === 'LONG' || side === 'BUY') return ((exit - s.entry_price) / s.entry_price) * 100;
   if(side === 'SHORT' || side === 'SELL') return ((s.entry_price - exit) / s.entry_price) * 100;
   return 0;
@@ -1081,10 +1053,10 @@ async function loadData() {
 
 function startRealtime() {
   supabaseClient
-    .channel("orders-live")
+    .channel("signals-live")
     .on(
       "postgres_changes",
-      { event: "*", schema: "public", table: "orders" },
+      { event: "*", schema: "public", table: "signals" },
       () => loadData()
     )
     .subscribe();
